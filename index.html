@@ -57,12 +57,12 @@ button { font: inherit; color: inherit; }
 /* top bar */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
 .bar-row { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding-block: 10px; }
-.brand { font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-right: auto; flex: none; white-space: nowrap; }
 .brand-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--model); box-shadow: 0 0 0 4px var(--model-soft); }
 .search { position: relative; flex: 1 1 220px; max-width: 340px; }
 .search input { width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 15px; }
-.seg { display: inline-flex; background: var(--sunk); border-radius: 9px; padding: 3px; }
-.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); }
+.seg { flex: none; display: inline-flex; background: var(--sunk); border-radius: 9px; padding: 3px; }
+.seg button { white-space: nowrap; border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
 .secnav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
 .secnav button { flex: none; border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 4px 12px; font-size: 13.5px; cursor: pointer; color: var(--muted); }
@@ -70,7 +70,7 @@ button { font: inherit; color: inherit; }
 .secnav b { color: var(--accent); font-family: var(--font-mono); font-weight: 600; margin-right: 4px; }
 
 /* hero */
-.hero { padding-block: 44px 28px; display: grid; gap: 28px; }
+.hero { padding-block: 44px 28px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 .hero h1 { font-size: clamp(40px, 7vw, 76px); font-weight: 800; letter-spacing: -0.03em; }
 .hero h1 span { color: var(--model); }
 .lead { font-size: 19px; max-width: 62ch; color: var(--muted); margin-top: 14px; }
@@ -103,7 +103,7 @@ button { font: inherit; color: inherit; }
 .sec-num { font-family: var(--font-mono); font-size: 14px; color: var(--accent); font-weight: 600; }
 .sec-head h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.02em; }
 .sec-head p { grid-column: 2; color: var(--muted); max-width: 64ch; }
-.features { display: grid; gap: 20px; }
+.features { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 .mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; margin-top: 20px; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); scroll-margin-top: 120px; transition: box-shadow .3s, border-color .3s; }
@@ -156,8 +156,8 @@ body.mode-dev .chip small { display: block; }
 .slider-row output { font-family: var(--font-mono); font-size: 14px; min-width: 40px; text-align: right; }
 .temp-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
 .bars { display: grid; gap: 6px; }
-.bar-row { display: grid; grid-template-columns: 76px 1fr 46px; gap: 10px; align-items: center; font-size: 14px; }
-.bar-row .bw { font-family: var(--font-mono); }
+.prob-row { display: grid; grid-template-columns: 76px 1fr 46px; gap: 10px; align-items: center; font-size: 14px; }
+.prob-row .bw { font-family: var(--font-mono); }
 .track { height: 16px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
 .fill { display: block; height: 100%; background: var(--model); border-radius: 4px; transition: width .35s ease; }
 .bp { font-family: var(--font-mono); font-size: 13px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -827,7 +827,7 @@ VIZ.temperature = box => {
   box.innerHTML = `<p class="prompt-line">The cat sat on the <span class="blank" id="t-blank">___</span></p>
     <div class="slider-row"><label for="t-slider">Temperature</label><input type="range" id="t-slider" min="0" max="2" step="0.05" value="0.7"><output id="t-val" for="t-slider">0.70</output></div>
     <div class="temp-scale"><span>0 = always the favorite</span><span>2 = wild</span></div>
-    <div class="bars">${W.map(([w]) => `<div class="bar-row"><span class="bw">${w}</span><span class="track"><span class="fill"></span></span><span class="bp"></span></div>`).join('')}</div>
+    <div class="bars">${W.map(([w]) => `<div class="prob-row"><span class="bw">${w}</span><span class="track"><span class="fill"></span></span><span class="bp"></span></div>`).join('')}</div>
     <div class="vbtns"><button class="btn" id="t-sample">Pick 10 next words</button><div class="samples" id="t-samples" aria-live="polite"></div></div>`;
   const sl = $('#t-slider', box);
   const probs = T => {
@@ -839,7 +839,7 @@ VIZ.temperature = box => {
   const update = () => {
     const T = +sl.value, p = probs(T);
     $('#t-val', box).textContent = T.toFixed(2);
-    $$('.bar-row', box).forEach((r, i) => { $('.fill', r).style.width = (p[i] * 100) + '%'; $('.bp', r).textContent = (p[i] * 100).toFixed(p[i] < .01 && p[i] > 0 ? 1 : 0) + '%'; });
+    $$('.prob-row', box).forEach((r, i) => { $('.fill', r).style.width = (p[i] * 100) + '%'; $('.bp', r).textContent = (p[i] * 100).toFixed(p[i] < .01 && p[i] > 0 ? 1 : 0) + '%'; });
   };
   $('#t-sample', box).onclick = () => {
     const p = probs(+sl.value);
