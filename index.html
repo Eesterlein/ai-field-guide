@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="An interactive guide to the AI words programmers keep hearing (agent, harness, context window, MCP, RAG and more), with live demos.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='9' fill='%23D9631D'/><circle cx='16' cy='16' r='14' fill='none' stroke='%23FBE3D2' stroke-width='4'/></svg>">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>AI Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky control bar, a clickable system map as the hero, then five sections that build from basics to agents. Live demos sit beside their definitions. */
+:root {
+  --bg: #EEF1F6; --surface: #FFFFFF; --sunk: #E4E9F1; --ink: #121831; --muted: #566079; --line: #D3DAE6;
+  --accent: #2B47D1; --accent-soft: #DCE3FB; --model: #D9631D; --model-soft: #FBE3D2;
+  --ok: #17845A; --ok-soft: #D3EFE2; --bad: #C2384A; --bad-soft: #F8DADF; --violet: #7A45C4; --violet-soft: #EADFF8;
+  --c1: #C9D6FF; --c2: #FFD6BD; --c3: #C8EED6; --c4: #F3CDEA; --c5: #FCEBA9; --c6: #C9E7F4;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1122; --surface: #151B30; --sunk: #1C2340; --ink: #E7EBF7; --muted: #9AA3BE; --line: #2A3253;
+    --accent: #8399FF; --accent-soft: #232C57; --model: #F2945A; --model-soft: #48291A;
+    --ok: #4FCB8F; --ok-soft: #153A2A; --bad: #F07A8A; --bad-soft: #4A1D26; --violet: #B48CF2; --violet-soft: #34254F;
+    --c1: #2F3B78; --c2: #5A3420; --c3: #1F4A33; --c4: #4F2448; --c5: #4D4318; --c6: #1D4252;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1122; --surface: #151B30; --sunk: #1C2340; --ink: #E7EBF7; --muted: #9AA3BE; --line: #2A3253;
+  --accent: #8399FF; --accent-soft: #232C57; --model: #F2945A; --model-soft: #48291A;
+  --ok: #4FCB8F; --ok-soft: #153A2A; --bad: #F07A8A; --bad-soft: #4A1D26; --violet: #B48CF2; --violet-soft: #34254F;
+  --c1: #2F3B78; --c2: #5A3420; --c3: #1F4A33; --c4: #4F2448; --c5: #4D4318; --c6: #1D4252;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+code, pre, .mono { font-family: var(--font-mono); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar-row { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding-block: 10px; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.brand-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--model); box-shadow: 0 0 0 4px var(--model-soft); }
+.search { position: relative; flex: 1 1 220px; max-width: 340px; }
+.search input { width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 15px; }
+.seg { display: inline-flex; background: var(--sunk); border-radius: 9px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.secnav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.secnav button { flex: none; border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 4px 12px; font-size: 13.5px; cursor: pointer; color: var(--muted); }
+.secnav button:hover { color: var(--ink); border-color: var(--accent); }
+.secnav b { color: var(--accent); font-family: var(--font-mono); font-weight: 600; margin-right: 4px; }
+
+/* hero */
+.hero { padding-block: 44px 28px; display: grid; gap: 28px; }
+.hero h1 { font-size: clamp(40px, 7vw, 76px); font-weight: 800; letter-spacing: -0.03em; }
+.hero h1 span { color: var(--model); }
+.lead { font-size: 19px; max-width: 62ch; color: var(--muted); margin-top: 14px; }
+.lead strong { color: var(--ink); }
+.counts { display: flex; gap: 8px 18px; flex-wrap: wrap; margin-top: 16px; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.counts b { color: var(--ink); font-weight: 600; }
+.map-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 10px; }
+.map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.map-head h2 { font-size: 20px; }
+.hint { font-size: 13.5px; color: var(--muted); }
+.scroll-x { overflow-x: auto; }
+.map { display: block; width: 100%; min-width: 720px; height: auto; margin-top: 8px; }
+.map text { font-family: var(--font-body); fill: var(--ink); font-size: 14px; }
+.map .small { font-size: 11.5px; fill: var(--muted); }
+.map .node { cursor: pointer; }
+.map .node rect, .map .node circle { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; transition: stroke .15s, fill .15s; }
+.map .node:hover rect, .map .node:focus-visible rect, .map .node:hover circle, .map .node:focus-visible circle { stroke: var(--accent); fill: var(--accent-soft); }
+.map .node:focus-visible { outline: none; }
+.map .model circle { fill: var(--model-soft); stroke: var(--model); stroke-width: 2; }
+.map .model:hover circle { fill: var(--model-soft); stroke: var(--accent); }
+.map .harness-box { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 8 6; }
+.map .harness-label { fill: var(--accent); font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.map .wire { stroke: var(--line); stroke-width: 1.6; fill: none; }
+.map .flow { stroke: var(--model); stroke-width: 2.2; fill: none; stroke-dasharray: 4 10; animation: flow 1.6s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -28; } }
+
+/* sections */
+.sec { padding-block: 40px 8px; scroll-margin-top: 110px; }
+.sec-head { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: baseline; margin-bottom: 22px; }
+.sec-num { font-family: var(--font-mono); font-size: 14px; color: var(--accent); font-weight: 600; }
+.sec-head h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.02em; }
+.sec-head p { grid-column: 2; color: var(--muted); max-width: 64ch; }
+.features { display: grid; gap: 20px; }
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; margin-top: 20px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); scroll-margin-top: 120px; transition: box-shadow .3s, border-color .3s; }
+.card.flash { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.feature .ctext { padding: 24px; border-right: 1px solid var(--line); }
+.feature .viz { padding: 22px; min-width: 0; }
+.mini { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.ctext { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card h3 { font-size: 26px; font-weight: 700; letter-spacing: -0.015em; }
+.mini h3 { font-size: 21px; }
+.tagline { font-size: 17px; font-weight: 700; }
+.mode-label { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+.dev .mode-label { color: var(--accent); }
+.beg p:not(.mode-label), .dev p:not(.mode-label) { color: var(--ink); }
+.dev { display: none; }
+body.mode-dev .dev { display: block; }
+body.mode-dev .beg { display: none; }
+pre { margin: 10px 0 0; background: var(--sunk); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; overflow-x: auto; white-space: pre; }
+.see { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); margin-top: auto; padding-top: 4px; }
+.see button { border: 0; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.empty { padding: 32px; text-align: center; color: var(--muted); }
+
+/* shared viz parts */
+.vlabel { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; }
+.vnote { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.vstats { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-top: 10px; }
+.vbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--surface); border-radius: 8px; padding: 7px 14px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+textarea, select { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+svg text { font-family: var(--font-body); }
+
+/* tokenizer */
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 14px; min-height: 40px; }
+.chip { font-family: var(--font-mono); font-size: 14px; padding: 4px 6px; border-radius: 5px; color: var(--ink); display: inline-flex; flex-direction: column; align-items: center; line-height: 1.25; animation: pop .25s ease-out both; }
+.chip .sp { color: var(--muted); }
+.chip small { display: none; font-size: 9.5px; color: var(--muted); }
+body.mode-dev .chip small { display: block; }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } }
+
+/* temperature */
+.prompt-line { font-size: 20px; font-family: var(--font-display); font-weight: 700; }
+.blank { display: inline-block; min-width: 70px; border-bottom: 3px solid var(--model); color: var(--model); text-align: center; }
+.blank.pop { animation: pop .3s ease-out; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.slider-row label { font-weight: 700; font-size: 14px; }
+.slider-row input { flex: 1; accent-color: var(--model); }
+.slider-row output { font-family: var(--font-mono); font-size: 14px; min-width: 40px; text-align: right; }
+.temp-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
+.bars { display: grid; gap: 6px; }
+.bar-row { display: grid; grid-template-columns: 76px 1fr 46px; gap: 10px; align-items: center; font-size: 14px; }
+.bar-row .bw { font-family: var(--font-mono); }
+.track { height: 16px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+.fill { display: block; height: 100%; background: var(--model); border-radius: 4px; transition: width .35s ease; }
+.bp { font-family: var(--font-mono); font-size: 13px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.samples { display: flex; flex-wrap: wrap; gap: 4px; }
+.samples span { font-family: var(--font-mono); font-size: 13px; background: var(--model-soft); border-radius: 4px; padding: 1px 6px; }
+
+/* embeddings */
+.emb { width: 100%; height: auto; display: block; background: var(--bg); border-radius: 10px; }
+.emb .grid line { stroke: var(--line); stroke-width: 1; }
+.emb .pt { cursor: pointer; }
+.emb .pt text { font-size: 12.5px; fill: var(--ink); }
+.emb .pt circle { stroke: var(--surface); stroke-width: 2; transition: r .2s; }
+.emb .pt.sel circle { r: 9; stroke: var(--ink); }
+.emb .pt.near text { font-weight: 700; }
+.emb .nl { stroke: var(--ink); stroke-width: 1.4; stroke-dasharray: 4 4; opacity: .6; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+/* context bucket */
+.ctx-wrap { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 20px; }
+.bucket { height: 300px; border: 2px solid var(--ink); border-top: 0; border-radius: 0 0 14px 14px; padding: 4px; display: flex; flex-direction: column; gap: 3px; background: repeating-linear-gradient(-45deg, transparent 0 8px, var(--sunk) 8px 9px); position: relative; }
+.blk { border-radius: 5px; font-size: 11.5px; line-height: 1.15; padding: 2px 7px; display: flex; align-items: center; justify-content: space-between; gap: 6px; overflow: hidden; color: var(--ink); flex: none; transition: height .35s ease; }
+.blk span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blk em { font-style: normal; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); flex: none; }
+.k-sys { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.k-user { background: var(--c1); }
+.k-ai { background: var(--c3); }
+.k-file { background: var(--c5); }
+.k-summary { background: var(--violet-soft); outline: 1.5px dashed var(--violet); }
+.blk.in { animation: drop .4s ease-out; }
+.blk.squish { animation: squish .6s ease-out; }
+@keyframes drop { from { transform: translateY(-30px); opacity: 0; } }
+@keyframes squish { 0% { transform: scaleY(2.4); } 60% { transform: scaleY(.85); } 100% { transform: none; } }
+.meter { height: 10px; background: var(--sunk); border-radius: 5px; overflow: hidden; margin-top: 6px; }
+.meter span { display: block; height: 100%; background: var(--ok); transition: width .35s, background .35s; }
+.meter span.hot { background: var(--bad); }
+.ctx-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.radio-row { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; border: 0; padding: 0; margin: 0; }
+.radio-row legend { font-weight: 700; font-size: 14px; margin-bottom: 4px; padding: 0; }
+.cx-note { font-size: 14px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); min-height: 44px; }
+
+/* agent loop */
+.vgoal { font-size: 15px; margin-bottom: 8px; }
+.loop-wrap { display: grid; grid-template-columns: minmax(180px, 250px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.loop-svg { width: 100%; height: auto; }
+.loop-svg .ring { fill: none; stroke: var(--line); stroke-width: 10; }
+.loop-svg .lnode circle { fill: var(--surface); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s; }
+.loop-svg .lnode text { font-size: 14px; font-weight: 700; fill: var(--ink); text-anchor: middle; }
+.loop-svg .lnode.on circle { fill: var(--model-soft); stroke: var(--model); }
+.loop-svg .center { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); text-anchor: middle; }
+.loop-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 13.5px; }
+.loop-log li { display: grid; grid-template-columns: 70px 1fr; gap: 8px; padding: 3px 6px; border-radius: 6px; transition: opacity .25s, background .25s; }
+.loop-log li.dim { opacity: .25; }
+.loop-log li.cur { background: var(--model-soft); }
+.loop-log .t-act { font-family: var(--font-mono); font-size: 12.5px; }
+.ph { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; align-self: center; }
+.ph-think { color: var(--accent); } .ph-act { color: var(--model); } .ph-observe { color: var(--ok); } .ph-done { color: var(--violet); }
+
+/* harness */
+.hz { width: 100%; height: auto; display: block; }
+.hz .spoke { stroke: var(--line); stroke-width: 2; transition: opacity .4s; }
+.hz .mod { cursor: pointer; transition: opacity .4s, transform .4s; }
+.hz .mod rect { fill: var(--surface); stroke: var(--accent); stroke-width: 1.6; transition: fill .2s; }
+.hz .mod text { font-size: 14px; font-weight: 700; fill: var(--ink); text-anchor: middle; }
+.hz .mod.sel rect { fill: var(--accent-soft); stroke-width: 2.6; }
+.hz .core circle { fill: var(--model-soft); stroke: var(--model); stroke-width: 2.5; }
+.hz .core text { text-anchor: middle; font-weight: 700; fill: var(--ink); }
+.hz .shell { fill: none; stroke: var(--accent); stroke-dasharray: 7 6; stroke-width: 1.6; transition: opacity .4s; }
+.hz.stripped .mod, .hz.stripped .spoke, .hz.stripped .shell { opacity: .07; pointer-events: none; }
+.hz-info { margin-top: 8px; padding: 12px 14px; border-radius: 8px; background: var(--sunk); font-size: 15px; min-height: 68px; }
+.hz-info b { font-family: var(--font-display); }
+
+/* tool-use sequence */
+.seq { min-width: 520px; }
+.seq-head, .seq-row { display: grid; grid-template-columns: repeat(4, 1fr); }
+.seq-head div { text-align: center; font-weight: 700; font-size: 13px; padding-bottom: 6px; }
+.seq-head div:nth-child(3) { color: var(--model); }
+.seq-row { position: relative; min-height: 46px; }
+.lane { position: relative; }
+.lane::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1.5px dashed var(--line); }
+.arrow { grid-row: 1; position: relative; align-self: end; margin-bottom: 8px; border-top: 2px solid var(--ink); transition: opacity .3s, transform .3s; }
+.arrow::after { content: ""; position: absolute; top: -7px; border: 6px solid transparent; }
+.arrow.r::after { right: -2px; border-left: 9px solid var(--ink); border-right: 0; }
+.arrow.l::after { left: -2px; border-right: 9px solid var(--ink); border-left: 0; }
+.arrow span { position: absolute; bottom: 5px; left: 0; right: 0; text-align: center; font-size: 12px; line-height: 1.25; padding: 0 4px; }
+.arrow.tool { border-top-color: var(--model); }
+.arrow.tool.r::after { border-left-color: var(--model); }
+.arrow.tool.l::after { border-right-color: var(--model); }
+.arrow.tool span { font-family: var(--font-mono); color: var(--model); font-size: 11.5px; }
+.seq-row.hide .arrow { opacity: 0; transform: translateY(6px); }
+
+/* MCP */
+.mcp { width: 100%; height: auto; display: block; }
+.mcp .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.6; }
+.mcp .app { fill: var(--model-soft); stroke: var(--model); }
+.mcp .hub { fill: var(--accent); }
+.mcp .hubt { fill: var(--surface); font-weight: 700; text-anchor: middle; font-size: 14px; }
+.mcp text { font-size: 13px; fill: var(--ink); }
+.mcp .link { stroke: var(--line); stroke-width: 2; fill: none; }
+.mcp .link.on { stroke: var(--accent); stroke-dasharray: 6 5; animation: flow 1s linear infinite; }
+.mcp .srv { cursor: pointer; }
+.mcp .srv.on rect { fill: var(--accent-soft); stroke: var(--accent); }
+.mcp .plug { fill: var(--muted); font-size: 11px; }
+.tool-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; min-height: 28px; }
+.tool-chips span { font-family: var(--font-mono); font-size: 12.5px; background: var(--accent-soft); color: var(--ink); border-radius: 5px; padding: 2px 8px; animation: pop .25s ease-out both; }
+
+/* RAG pipeline */
+.rag { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stage { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; transition: opacity .3s, border-color .3s, background .3s; display: flex; flex-direction: column; gap: 4px; }
+.stage h4 { margin: 0; font-family: var(--font-display); font-size: 15px; display: flex; gap: 6px; align-items: baseline; }
+.stage h4 i { font-style: normal; font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.stage .mono { font-size: 12px; word-break: break-word; }
+.stage.dim { opacity: .3; }
+.stage.cur { border-color: var(--accent); background: var(--accent-soft); }
+.stage.final { border-color: var(--ok); }
+.hit { display: flex; justify-content: space-between; gap: 6px; font-size: 12.5px; border-top: 1px dashed var(--line); padding-top: 3px; }
+.hit b { font-family: var(--font-mono); font-weight: 600; color: var(--ok); }
+
+/* subagents */
+.orch { border: 2px solid var(--model); border-radius: 10px; padding: 12px; background: var(--model-soft); }
+.workers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 26px; position: relative; }
+.workers::before { content: ""; position: absolute; left: 16%; right: 16%; top: -16px; border-top: 2px solid var(--line); }
+.worker { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.worker::before { content: ""; position: absolute; left: 50%; top: -17px; height: 16px; border-left: 2px solid var(--line); }
+.worker b { font-family: var(--font-display); font-size: 14px; }
+.cbar { height: 8px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+.cbar span { display: block; height: 100%; background: var(--accent); transition: width 1.2s ease; }
+.orch .cbar span { background: var(--model); }
+.cbar-l { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+.result { font-size: 12.5px; background: var(--ok-soft); border-radius: 6px; padding: 5px 7px; transition: opacity .4s; }
+.result.hide { opacity: 0; }
+
+/* caching */
+.race { display: grid; gap: 16px; }
+.race-row p { font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.race-row p span { font-family: var(--font-mono); font-weight: 400; color: var(--muted); font-size: 13px; }
+.rtrack { display: flex; height: 34px; border-radius: 8px; overflow: hidden; background: var(--sunk); margin-top: 6px; }
+.seg-a, .seg-b { position: relative; overflow: hidden; font-size: 12px; display: flex; align-items: center; padding-left: 8px; white-space: nowrap; }
+.seg-a { flex: 0 0 82%; } .seg-b { flex: 1; border-left: 2px solid var(--surface); }
+.seg-a i, .seg-b i { position: absolute; inset: 0 auto 0 0; width: 100%; }
+.seg-a span, .seg-b span { position: relative; }
+.miss .seg-a i { background: var(--c2); }
+.hit-row .seg-a i { background: var(--ok-soft); }
+.seg-b i { background: var(--c1); }
+
+/* decision */
+.decide { border: 1.5px solid var(--line); border-radius: 10px; padding: 16px; }
+.trail { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12.5px; margin-bottom: 10px; color: var(--muted); }
+.trail span { background: var(--sunk); border-radius: 5px; padding: 2px 8px; }
+.dq { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+.verdict { border-radius: 10px; padding: 14px; background: var(--ok-soft); }
+.verdict b { font-family: var(--font-display); font-size: 20px; display: block; margin-bottom: 4px; }
+
+/* system prompt stack */
+.stack { display: grid; gap: 4px; font-size: 13px; }
+.layer { border-radius: 6px; padding: 6px 10px; background: var(--sunk); }
+.layer.l-sys { background: var(--accent-soft); outline: 1.5px solid var(--accent); font-weight: 700; }
+.layer.l-new { background: var(--c1); }
+
+/* habits */
+.pit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; }
+.pit { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.pit h3 { font-size: 20px; }
+.risk { align-self: flex-start; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 2px 10px; }
+.risk-halluc { background: var(--violet-soft); color: var(--violet); }
+.risk-leak, .risk-security { background: var(--bad-soft); color: var(--bad); }
+.risk-context { background: var(--accent-soft); color: var(--accent); }
+.risk-wrong { background: var(--model-soft); color: var(--model); }
+.risk-waste { background: var(--sunk); color: var(--muted); }
+.hb { border-radius: 8px; padding: 10px 12px; font-size: 14.5px; }
+.hb .mode-label { display: flex; gap: 6px; align-items: center; }
+.hb-dont { background: var(--bad-soft); }
+.hb-dont .mode-label { color: var(--bad); }
+.hb-what { padding: 0 2px; }
+.hb-do { background: var(--ok-soft); }
+.hb-do .mode-label { color: var(--ok); }
+.spot-q { font-weight: 700; font-size: 15px; background: var(--c1); border-radius: 10px 10px 10px 2px; padding: 10px 14px; align-self: flex-start; max-width: 90%; }
+.spot-a { font-size: 16px; line-height: 1.9; margin-top: 12px; background: var(--sunk); border-radius: 10px 10px 2px 10px; padding: 12px 14px; }
+.claim { border: 0; background: transparent; padding: 1px 3px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 16px; line-height: 1.7; border-bottom: 2px dotted var(--muted); }
+.claim:hover { background: var(--surface); }
+.claim.flag { background: var(--model-soft); border-bottom-color: var(--model); }
+.claim.real { background: var(--ok-soft); border-bottom: 2px solid var(--ok); }
+.claim.fake { background: var(--bad-soft); border-bottom: 2px solid var(--bad); }
+.spot-out { display: grid; gap: 6px; margin-top: 12px; font-size: 14px; }
+.spot-out p b { font-family: var(--font-display); }
+
+/* quiz */
+.quiz { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.q { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.q h3 { font-size: 18px; font-weight: 700; }
+.opts { display: grid; gap: 6px; }
+.opts button { text-align: left; border: 1.5px solid var(--line); background: var(--bg); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 15px; }
+.opts button:hover:not(:disabled) { border-color: var(--accent); }
+.opts button.right { border-color: var(--ok); background: var(--ok-soft); }
+.opts button.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opts button:disabled { cursor: default; }
+.why { font-size: 14px; color: var(--muted); }
+.score { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+
+footer { padding-block: 40px 56px; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 860px) {
+  .feature { grid-template-columns: minmax(0, 1fr); }
+  .feature .ctext { border-right: 0; border-bottom: 1px solid var(--line); }
+  .rag { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .ctx-wrap, .loop-wrap { grid-template-columns: minmax(0, 1fr); }
+  .loop-svg { max-width: 220px; margin: 0 auto; }
+  .workers { grid-template-columns: minmax(0, 1fr); }
+  .workers::before, .worker::before { display: none; }
+  .rag { grid-template-columns: minmax(0, 1fr); }
+  .feature .ctext, .feature .viz { padding: 18px; }
+  .search { max-width: none; order: 3; flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="bar-row">
+      <div class="brand"><span class="brand-dot" aria-hidden="true"></span>AI Field Guide</div>
+      <div class="search"><input id="q" type="search" placeholder="Search terms, like 'context' or 'MCP'" aria-label="Search terms"></div>
+      <div class="seg" role="group" aria-label="Explanation level">
+        <button id="m-beg" aria-pressed="true">Plain English</button>
+        <button id="m-dev" aria-pressed="false">Developer</button>
+      </div>
+    </div>
+    <nav class="secnav" id="secnav" aria-label="Sections"></nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>AI Field <span>Guide</span></h1>
+      <p class="lead">The words everyone keeps using (<strong>agent</strong>, <strong>harness</strong>, <strong>context</strong>, <strong>MCP</strong>), explained with demos you can play with. Switch between <strong>Plain English</strong> and <strong>Developer</strong> mode at the top.</p>
+      <div class="counts" id="counts"></div>
+    </div>
+    <div class="map-card">
+      <div class="map-head">
+        <h2>How the pieces fit together</h2>
+        <span class="hint">Click any piece to jump to its explanation.</span>
+      </div>
+      <div class="scroll-x">
+        <svg class="map" viewBox="0 0 960 380" role="img" aria-label="Diagram of an AI agent: you talk to a harness, which wraps the model with context, tools, memory and more">
+          <path class="wire" d="M110 195 H150"/>
+          <path class="flow" d="M110 195 H150"/>
+          <rect class="harness-box" x="150" y="22" width="560" height="340" rx="18"/>
+          <text class="harness-label" x="170" y="50">Harness</text>
+          <text class="small" x="240" y="50">(e.g. Claude Code)</text>
+          <g class="spokes">
+            <path class="wire" d="M370 92 L382 170"/><path class="wire" d="M370 152 L372 186"/>
+            <path class="wire" d="M370 222 L372 206"/><path class="wire" d="M370 292 L384 224"/>
+            <path class="wire" d="M490 92 L470 170"/><path class="wire" d="M490 162 L480 186"/>
+            <path class="wire" d="M490 232 L480 208"/><path class="wire" d="M490 302 L466 226"/>
+            <path class="flow" d="M370 92 L382 170"/><path class="flow" d="M490 162 L480 186"/>
+          </g>
+          <path class="wire" d="M670 162 H742"/><path class="flow" d="M670 162 H742"/>
+          <path class="wire" d="M794 148 L830 92"/><path class="wire" d="M800 162 H830"/><path class="wire" d="M794 176 L830 232"/>
+          <path class="wire" d="M370 152 C 600 400, 700 340, 740 318"/>
+
+          <g class="node" data-go="prompt" tabindex="0" role="button" aria-label="You: prompt"><rect x="14" y="170" width="96" height="50" rx="25"/><text x="62" y="200" text-anchor="middle">You</text></g>
+
+          <g class="node" data-go="context" tabindex="0" role="button" aria-label="Context window"><rect x="190" y="68" width="180" height="48" rx="8"/><text x="206" y="97">Context window</text></g>
+          <g class="node" data-go="system" tabindex="0" role="button" aria-label="System prompt"><rect x="190" y="130" width="180" height="44" rx="8"/><text x="206" y="157">System prompt</text></g>
+          <g class="node" data-go="skills" tabindex="0" role="button" aria-label="Skills"><rect x="190" y="198" width="180" height="44" rx="8"/><text x="206" y="225">Skills</text></g>
+          <g class="node" data-go="memory" tabindex="0" role="button" aria-label="Memory"><rect x="190" y="268" width="180" height="48" rx="8"/><text x="206" y="297">Memory</text></g>
+
+          <g class="node model" data-go="llm" tabindex="0" role="button" aria-label="Model (LLM)"><circle cx="428" cy="197" r="56"/><text x="428" y="193" text-anchor="middle" font-weight="700">Model</text><text x="428" y="212" text-anchor="middle" class="small">(the LLM)</text></g>
+
+          <g class="node" data-go="agent" tabindex="0" role="button" aria-label="Agent loop"><rect x="490" y="68" width="180" height="48" rx="8"/><text x="506" y="97">Agent loop ↻</text></g>
+          <g class="node" data-go="tools" tabindex="0" role="button" aria-label="Tools"><rect x="490" y="140" width="180" height="44" rx="8"/><text x="506" y="167">Tools</text></g>
+          <g class="node" data-go="subagents" tabindex="0" role="button" aria-label="Subagents"><rect x="490" y="210" width="180" height="44" rx="8"/><text x="506" y="237">Subagents</text></g>
+          <g class="node" data-go="guardrails" tabindex="0" role="button" aria-label="Permissions and guardrails"><rect x="490" y="280" width="180" height="48" rx="8"/><text x="506" y="309">Permissions</text></g>
+
+          <g class="node" data-go="mcp" tabindex="0" role="button" aria-label="MCP"><circle cx="770" cy="162" r="30"/><text x="770" y="167" text-anchor="middle" font-weight="700">MCP</text></g>
+          <g class="node" data-go="mcp" tabindex="0" role="button" aria-label="MCP server: GitHub"><rect x="830" y="72" width="116" height="38" rx="8"/><text x="846" y="96">GitHub</text></g>
+          <g class="node" data-go="mcp" tabindex="0" role="button" aria-label="MCP server: Database"><rect x="830" y="143" width="116" height="38" rx="8"/><text x="846" y="167">Database</text></g>
+          <g class="node" data-go="mcp" tabindex="0" role="button" aria-label="MCP server: Slack"><rect x="830" y="214" width="116" height="38" rx="8"/><text x="846" y="238">Slack</text></g>
+          <g class="node" data-go="rag" tabindex="0" role="button" aria-label="Vector database for RAG"><rect x="740" y="294" width="206" height="48" rx="8"/><text x="756" y="323">Vector DB (RAG)</text></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="sections"></div>
+  <section class="sec wrap" id="sec-habits">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2>Good habits, bad habits</h2>
+      <p>AI is most dangerous when it sounds sure of itself. These are the common ways people get burned, and what to do instead.</p>
+    </div>
+    <div class="features" id="habits-feature"></div>
+    <div class="pit-grid" id="habits"></div>
+  </section>
+  <div class="wrap"><p class="empty" id="noresults" hidden>No terms match that search. Try a shorter word.</p></div>
+
+  <section class="sec wrap" id="sec-quiz">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2>Check yourself</h2>
+      <p>Eight quick questions. Pick an answer to see why. <span class="score" id="score"></span></p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>The demos are simplified pictures of how these systems behave, not real model internals. Numbers in the demos are illustrative.</p>
+</footer>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, RM ? 0 : ms));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const SECTIONS = [
+  { id: 'models', title: 'How models work', blurb: 'What is actually happening when you type into a chatbot.' },
+  { id: 'talking', title: 'Talking to models', blurb: 'How the words you send shape what comes back.' },
+  { id: 'abilities', title: 'Giving models abilities', blurb: 'On its own a model only writes text. These let it look things up and take action.' },
+  { id: 'agents', title: 'Agents', blurb: 'A model plus tools plus a loop. This is where the newer vocabulary lives.' },
+  { id: 'shipping', title: 'Shipping it', blurb: 'Making AI features reliable, safe, fast and affordable.' },
+];
+
+const TERMS = [
+  // 1. How models work
+  { id: 'llm', sec: 'models', term: 'Large language model (LLM)', tag: 'A program that predicts the next piece of text.',
+    beg: "Think of the most well-read autocomplete ever built. It has read a huge amount of text and learned which words tend to follow which. When you ask it something, it writes the answer one small piece at a time, picking a likely next piece each time.",
+    dev: "A transformer neural network with billions of parameters, trained to predict the next token, then tuned to follow instructions. It's stateless: every request sends the full conversation and gets back a continuation. Claude, GPT and Gemini are LLMs.",
+    code: `response = client.messages.create(
+    model=MODEL,
+    max_tokens=500,
+    messages=[{"role": "user", "content": "Explain DNS in one line"}],
+)
+print(response.content[0].text)`, see: ['token', 'context'] },
+  { id: 'token', sec: 'models', term: 'Token', tag: 'The small chunks of text a model reads and writes.', viz: 'token',
+    beg: "Models don't see letters or whole words. They see tokens. Common words are one token, and rare or long words get chopped into pieces. Tokens are also how you pay and how a model's memory is measured.",
+    dev: "A tokenizer (usually byte-pair encoding) maps text to integer IDs. English averages about 4 characters per token. Pricing, rate limits, max_tokens and context size are all counted in tokens. Code, numbers and non-English text often use more than you'd guess.", see: ['context', 'latency'] },
+  { id: 'context', sec: 'models', term: 'Context window', tag: 'Everything the model can see at once.', viz: 'context',
+    beg: "The model's short-term memory is a bucket with a fixed size. Instructions, the chat so far, files you paste, and its own replies all go in. When the bucket fills up, something has to give: old items fall out, or get squished into a summary.",
+    dev: "The max tokens (input plus output) a model can handle in one request. Each turn resends the whole history, so long sessions get slower and pricier. Harnesses manage it with truncation, compaction, and by keeping details in files the agent can re-read later.", see: ['compaction', 'contexteng'] },
+  { id: 'temperature', sec: 'models', term: 'Temperature', tag: 'A dial between predictable and creative.', viz: 'temperature',
+    beg: "At every step the model has a list of possible next words, each with odds. Temperature controls how adventurous it is when picking. Turn it low and it almost always takes the favorite. Turn it high and long shots get a real chance.",
+    dev: "Logits are divided by T before softmax. T near 0 approaches greedy decoding; T above 1 flattens the distribution. Use low values for extraction and code, higher for brainstorming. Often paired with top_p or top_k sampling.", see: ['structured'] },
+  { id: 'embedding', sec: 'models', term: 'Embedding', tag: 'Text turned into coordinates, so meaning has a location.', viz: 'embedding',
+    beg: "Picture a map where every word or paragraph gets a pin, and things with similar meanings are pinned close together. 'Kitten' lands near 'cat' and far from 'truck'. A computer can then find 'things like this' by measuring distance on the map.",
+    dev: "An embedding model turns text into a vector, often 256 to 3,072 numbers long. Similarity is cosine similarity or dot product. Embeddings power semantic search, clustering, de-duplication and RAG. This demo squashes them down to 2D.",
+    code: `v = embed("kitten")            # [0.012, -0.341, 0.088, ...]
+cosine(v, embed("cat"))      # 0.82  close in meaning
+cosine(v, embed("truck"))    # 0.11  far apart`, see: ['vectordb', 'rag'] },
+  { id: 'hallucination', sec: 'models', term: 'Hallucination', tag: "Confident output that isn't true.",
+    beg: "A model is built to produce text that sounds right. When it doesn't know something, it can still produce text that sounds right, like a citation for a paper that doesn't exist. It isn't lying. It's predicting.",
+    dev: "Reduce it by grounding answers in real data (RAG, tool calls), asking the model to quote its sources, explicitly allowing 'I don't know', and checking outputs with evals or code. Never trust generated IDs, URLs or figures without validating them.", see: ['spot', 'rag', 'evals'] },
+
+  // 2. Talking to models
+  { id: 'prompt', sec: 'talking', term: 'Prompt', tag: 'The input you give the model.',
+    beg: "Your question or instruction. Clear prompts get better answers: say what you want, who it's for, and what shape the answer should take. Write it like a brief for a smart new coworker who knows nothing about your project.",
+    dev: "Technically, everything in the request: system prompt, message history, tool definitions and the latest user turn. Good prompts state the goal, constraints and output format, and use clear delimiters (like XML tags) to separate instructions from data.", see: ['system', 'fewshot'] },
+  { id: 'system', sec: 'talking', term: 'System prompt', tag: 'Standing instructions that sit above the whole chat.',
+    extra: `<div class="stack" aria-label="What the model reads, top to bottom"><div class="layer l-sys">System prompt: role, rules, tone</div><div class="layer">Earlier messages</div><div class="layer l-new">Your new message</div></div>`,
+    beg: "A rulebook the model reads before every reply, like 'You are a friendly tax helper. Keep answers short. Don't give legal advice.' Users usually never see it, but it shapes every answer.",
+    dev: "Sent as a separate system parameter. Use it for role, tone, rules and stable reference material. It rarely changes between requests, which makes it a natural candidate for prompt caching.",
+    code: `client.messages.create(
+    model=MODEL, max_tokens=800,
+    system="You are a terse senior code reviewer. Flag bugs first.",
+    messages=[{"role": "user", "content": diff}],
+)`, see: ['caching'] },
+  { id: 'fewshot', sec: 'talking', term: 'Few-shot prompting', tag: 'Teaching by example inside the prompt.',
+    beg: "Instead of describing the format you want, you show two or three examples. The model picks up the pattern and follows it.",
+    dev: "Include input/output pairs in the prompt. Vary them so the model learns the pattern rather than copying one answer. Zero-shot means no examples, one-shot means one, few-shot means several.",
+    code: `Review: "Loved it, works great"   -> positive
+Review: "Broke after one day"     -> negative
+Review: "Fast shipping, ok build" ->`, see: ['finetune'] },
+  { id: 'reasoning', sec: 'talking', term: 'Reasoning (thinking)', tag: 'Letting the model work it out before it answers.',
+    beg: "Like showing your work in math class. Giving the model room to think step by step before it commits to an answer makes it much better at hard problems.",
+    dev: "Chain-of-thought prompting asks for step-by-step reasoning. Newer models have built-in extended thinking that spends extra tokens reasoning before the final answer. More thinking usually means better results on complex tasks, and more latency and cost.", see: ['latency'] },
+  { id: 'structured', sec: 'talking', term: 'Structured output', tag: 'Getting answers back as data, not paragraphs.',
+    beg: "Asking for a filled-in form instead of an essay, so another program can read the answer directly.",
+    dev: "Ask for JSON matching a schema, or use the API's structured output or tool-schema features so the response always parses. Validate it anyway with a schema library like Pydantic or Zod.",
+    code: `{
+  "invoice_id": "INV-20417",
+  "total": 1249.50,
+  "due_date": "2026-11-15",
+  "confidence": "high"
+}`, see: ['tools'] },
+
+  // 3. Abilities
+  { id: 'tools', sec: 'abilities', term: 'Tool use (function calling)', tag: 'The model asks your code to do things for it.', viz: 'tools',
+    beg: "A model can't check the weather or look something up by itself. But you can hand it a menu of tools. When it needs one, it replies 'please call get_weather for Gunnison'. Your program runs it and hands back the result.",
+    dev: "You define tools with a name, description and JSON Schema. Instead of text, the model can respond with a tool_use block. Your code runs it and sends a tool_result in the next message. The model never executes anything itself. Your app does.",
+    code: `tools = [{
+    "name": "get_weather",
+    "description": "Current weather for a city",
+    "input_schema": {
+        "type": "object",
+        "properties": {"city": {"type": "string"}},
+        "required": ["city"],
+    },
+}]`, see: ['mcp', 'agent'] },
+  { id: 'mcp', sec: 'abilities', term: 'MCP (Model Context Protocol)', tag: 'A universal plug for connecting AI apps to tools and data.', viz: 'mcp',
+    beg: "Like USB-C for AI. Before MCP, every AI app needed custom wiring for every service. Now a service publishes one MCP server, and any app that speaks MCP can plug into it.",
+    dev: "An open protocol, started by Anthropic and now widely adopted. MCP servers expose tools, resources and prompts over stdio or HTTP. MCP clients (Claude Code, IDEs, desktop apps) discover them at runtime, so you add abilities through config instead of code.",
+    code: `// .mcp.json: which servers the app should start
+{
+  "mcpServers": {
+    "company-db": { "command": "python", "args": ["db_server.py"] }
+  }
+}`, see: ['tools', 'harness'] },
+  { id: 'rag', sec: 'abilities', term: 'RAG (retrieval-augmented generation)', tag: 'Look it up first, then answer.', viz: 'rag',
+    beg: "An open-book exam. Before answering, the system searches your documents for the most relevant passages and puts them in front of the model. The answer comes from your data instead of the model's memory.",
+    dev: "Index: chunk documents, embed each chunk, store in a vector DB. Query: embed the question, run nearest-neighbor search, put the top-k chunks in the prompt, generate with citations. Hybrid search (keyword plus vector) and reranking usually beat pure vector search.",
+    code: `q_vec  = embed(question)
+chunks = db.search(q_vec, top_k=3)
+prompt = f"Answer only from these sources:\\n{chunks}\\n\\nQ: {question}"
+answer = call_model(prompt)`, see: ['embedding', 'vectordb'] },
+  { id: 'vectordb', sec: 'abilities', term: 'Vector database', tag: 'A database that searches by meaning.',
+    beg: "A regular database finds rows where the words match exactly. A vector database finds rows that mean something similar, even when the words are different.",
+    dev: "Stores embeddings plus metadata and runs approximate nearest-neighbor search (HNSW, IVF). Examples: pgvector, Pinecone, Weaviate, Chroma, Qdrant. For small projects, pgvector or even a NumPy array is plenty.", see: ['embedding', 'rag'] },
+
+  // 4. Agents
+  { id: 'agent', sec: 'agents', term: 'Agent', tag: 'A model running in a loop, using tools until the job is done.', viz: 'agent',
+    beg: "A chatbot answers once. An agent keeps going. It thinks about what to do, does it, looks at what happened, and decides the next step, again and again until the goal is met. Like an intern who can actually use the computer.",
+    dev: "agent = model + tools + loop. Each turn, the model asks for tool calls, the harness runs them, adds the results to the context, and calls the model again. It stops when the model stops asking for tools, or when it hits a limit.",
+    code: `messages = [{"role": "user", "content": task}]
+while True:
+    reply = call_model(messages, tools=TOOLS)
+    messages.append(reply)
+    if not reply.tool_calls:        # model says it's done
+        break
+    for call in reply.tool_calls:
+        result = run_tool(call)     # the harness acts
+        messages.append(tool_result(call.id, result))`, see: ['agentic', 'harness'] },
+  { id: 'harness', sec: 'agents', term: 'Harness', tag: 'Everything wrapped around the model that makes it useful.', viz: 'harness',
+    beg: "If the model is an engine, the harness is the rest of the car: the steering (tools), the brakes (permissions), the dashboard (the screen you type in), the trunk (memory). An engine on its own just spins. Claude Code is a harness.",
+    dev: "The runtime around the model: the agent loop, tool execution, permission checks, context management and compaction, memory files, skills, subagents and the UI. Same model plus a different harness gives very different behavior. Agent SDKs let you build your own.", see: ['agent', 'guardrails'] },
+  { id: 'subagents', sec: 'agents', term: 'Subagents', tag: 'An agent that hands sub-tasks to helper agents.', viz: 'subagents',
+    beg: "A project lead who sends three assistants off to research different questions. Each comes back with a short summary, so the lead's desk doesn't get buried in everyone's notes.",
+    dev: "The main agent (orchestrator) starts subagents, each with its own fresh context window. They work in parallel and return condensed results. This keeps the main context clean and speeds up broad work, at the cost of more total tokens.", see: ['context', 'contexteng'] },
+  { id: 'agentic', sec: 'agents', term: 'Agentic AI', tag: 'AI that takes actions, not only gives answers.',
+    beg: "It's a scale, not an on/off switch. 'Agentic' describes how much the AI decides and does by itself: from suggesting text, to running one tool, to finishing a multi-hour task with little supervision.",
+    dev: "Usually means autonomy over multi-step work: planning, tool use, checking its own results and recovering from errors. More autonomy calls for more guardrails: permissions, sandboxes, spending limits and human checkpoints for risky steps.", see: ['agent', 'guardrails'] },
+  { id: 'skills', sec: 'agents', term: 'Skills', tag: 'Packaged know-how an agent loads only when needed.',
+    beg: "A binder of recipe cards. The agent can see every card's title, and only pulls out the full card when a task calls for it.",
+    dev: "A folder of instructions (a SKILL.md) plus optional scripts and reference files. Only a short description stays in context; the full contents load on demand. Gives the agent deep, task-specific procedures without filling up the context window.",
+    code: `skills/
+  monthly-report/
+    SKILL.md        # name + one-line description stay in context
+    template.xlsx   # loaded only when the skill is used`, see: ['contexteng'] },
+  { id: 'memory', sec: 'agents', term: 'Memory', tag: 'What an agent keeps between conversations.',
+    beg: "Models forget everything when a chat ends. Memory is a notebook the harness keeps on the model's behalf, holding your preferences, project facts and past decisions, and reads back to it next time.",
+    dev: "Models are stateless, so memory is a harness feature: files (like CLAUDE.md), a database, or a vector store that gets loaded or searched at the start of a session. Memories go stale, so check them against reality before acting on them.",
+    code: `# CLAUDE.md
+- Use pnpm, not npm
+- Tests live in /spec; run them before committing
+- Never edit files in /vendor`, see: ['context'] },
+  { id: 'compaction', sec: 'agents', term: 'Compaction', tag: 'Squishing old conversation into a summary to free up room.',
+    beg: "When the bucket is nearly full, the harness writes a summary of the older conversation and swaps it in, like condensing long meeting notes into a paragraph. Try 'Compact into a summary' in the context window demo.",
+    dev: "Triggered near the context limit: older turns are summarized by the model and replaced. It loses detail by design, so anything important should also live in files or memory.", see: ['context', 'memory'] },
+  { id: 'contexteng', sec: 'agents', term: 'Context engineering', tag: 'Deciding what goes into the bucket.',
+    beg: "The skill of giving the model exactly what it needs: the right files, the right instructions, nothing extra. Too little and it guesses. Too much and it gets distracted.",
+    dev: "Managing the token budget: retrieval, fetching data with tools just in time instead of pre-loading it, compaction, subagents for isolation, and structured notes. For agents this often matters more than how the prompt is worded.", see: ['context', 'skills', 'subagents'] },
+
+  // 5. Shipping
+  { id: 'caching', sec: 'shipping', term: 'Prompt caching', tag: 'Reusing the processed start of a prompt to save time and money.', viz: 'caching',
+    beg: "If every request starts with the same long instructions, the provider can remember the work it already did on that part. The next request skips ahead to the new bit, so it's faster and cheaper.",
+    dev: "Mark a stable prefix (system prompt, tool definitions, big documents) as cacheable. Later requests with an identical prefix read it from cache at a lower price and latency. Any change in the prefix breaks the cache from that point on, so put stable content first.",
+    code: `system=[{
+    "type": "text",
+    "text": LONG_POLICY_MANUAL,
+    "cache_control": {"type": "ephemeral"},  # cache up to here
+}]`, see: ['system', 'latency'] },
+  { id: 'finetune', sec: 'shipping', term: 'Fine-tuning vs prompting', tag: 'Change the model, or change what you tell it?', viz: 'finetune',
+    beg: "Fine-tuning is sending the model back to school with your examples. Prompting is giving it better instructions. Prompting is cheaper and quicker to change, so start there.",
+    dev: "Fine-tuning updates model weights using your examples. It's good for consistent style or format at scale and for narrow, stable tasks. It doesn't reliably teach new facts (use RAG for that). Try in order: prompting, few-shot, RAG and tools, then fine-tuning.", see: ['fewshot', 'rag'] },
+  { id: 'evals', sec: 'shipping', term: 'Evals', tag: 'Tests for AI behavior.',
+    beg: "A report card. You collect sample questions with known good answers, then check how often the AI gets them right every time you change something.",
+    dev: "A dataset of inputs plus a grader: exact match, code checks, or an LLM-as-judge rubric. Run it on every prompt or model change to catch regressions. Without evals, prompt changes are guesswork.",
+    code: `cases = [("Refund after 45 days on annual plan?", "yes"), ...]
+score = sum(grade(run(q), want) for q, want in cases) / len(cases)
+print(f"{score:.0%} passed")`, see: ['hallucination'] },
+  { id: 'guardrails', sec: 'shipping', term: 'Guardrails & permissions', tag: 'Checks that keep an AI system inside safe lines.',
+    beg: "The bumpers on a bowling lane. Rules and filters that stop the AI from doing things it shouldn't, like deleting files or sharing private data, and that ask a human before anything risky.",
+    dev: "Input and output validation, content filters, schema checks, permission prompts for risky tools, sandboxes, rate and spending limits, and human approval for actions that can't be undone.", see: ['harness', 'agentic'] },
+  { id: 'latency', sec: 'shipping', term: 'Latency & cost', tag: 'How long it takes and what it costs.',
+    beg: "Bigger models are smarter but slower and pricier. You pay per token going in and per token coming out. Picking the smallest model that does the job well is a real skill.",
+    dev: "Cost is roughly input tokens times input price plus output tokens times output price, and output usually costs more. Levers: smaller models for easy steps, caching, shorter context, streaming for perceived speed, and batch APIs for jobs that aren't urgent.", see: ['caching', 'token'] },
+];
+const byId = Object.fromEntries(TERMS.map(t => [t.id, t]));
+const EXTRA_NAMES = { spot: 'Spot the hallucination' };
+const nameOf = id => byId[id] ? byId[id].term.replace(/ \(.*\)/, '') : EXTRA_NAMES[id];
+
+const HABITS = [
+  { id: 'cite', title: 'Trusting citations and numbers', risk: ['halluc', 'Hallucination'],
+    dont: 'Copying a source, statistic, case number or link from an AI answer straight into a report.',
+    what: 'Some of them will be invented. They look exactly as real as the true ones, so you can\'t tell by reading.',
+    doit: 'Open every link and check every figure against the original. Better yet, give the AI the source and ask it to quote from it.', see: 'spot' },
+  { id: 'nodata', title: 'Asking about things it never saw', risk: ['halluc', 'Hallucination'],
+    dont: 'Asking about your private files, last week\'s news, or your company\'s internal records without providing them.',
+    what: 'It doesn\'t say "I don\'t know". It guesses, confidently, from what similar things usually look like.',
+    doit: 'Paste in the document, connect a tool, or use RAG. Tell it: "If the answer isn\'t in the material, say so."', see: 'rag' },
+  { id: 'secrets', title: 'Pasting sensitive data', risk: ['leak', 'Data leak'],
+    dont: 'Pasting passwords, API keys, personal information or confidential records into a personal AI account.',
+    what: 'That data leaves your control, may be kept, and can break workplace policy or privacy law.',
+    doit: 'Use the tools your organization has approved. Remove names, IDs and keys first. Keep secrets in environment variables, not in prompts.', see: 'guardrails' },
+  { id: 'vague', title: 'Vague prompts', risk: ['waste', 'Wasted effort'],
+    dont: '"Make this better." "Write some code for the report."',
+    what: 'You get a generic answer, then spend more time fixing it than writing it yourself.',
+    doit: 'Say the goal, the audience, the format and the constraints. Show an example of what good looks like.', see: 'prompt' },
+  { id: 'perms', title: 'Giving an agent the keys and walking away', risk: ['security', 'Security'],
+    dont: 'Letting an agent auto-approve everything with access to production data, email or deletion.',
+    what: 'One misunderstanding becomes a deleted folder, a sent email or a changed database that can\'t be undone.',
+    doit: 'Give it the least access it needs, work on a copy or a branch, and require a human yes for anything irreversible.', see: 'harness',
+    dev: 'Use read-only credentials and a sandbox or container. Keep backups and use git so changes can be rolled back.' },
+  { id: 'longchat', title: 'One endless chat for everything', risk: ['context', 'Lost context'],
+    dont: 'Running one conversation for days across unrelated tasks.',
+    what: 'The context window fills up. Early instructions get dropped or summarized away, and answers drift.',
+    doit: 'Start a fresh session per task. Put lasting rules in a memory file so every session starts with them.', see: 'context' },
+  { id: 'unread', title: 'Shipping code you haven\'t read', risk: ['security', 'Security'],
+    dont: 'Pasting AI-written code into production because it ran once without errors.',
+    what: 'Subtle bugs, security holes, and made-up library functions that only fail later.',
+    doit: 'Read it, run the tests, and ask the AI to explain any line you don\'t understand. You own what you ship.', see: 'evals',
+    dev: 'Watch for packages that don\'t exist (an attacker can register that name), hard-coded secrets, and SQL built from strings.' },
+  { id: 'math', title: 'Doing math in its head', risk: ['wrong', 'Wrong answer'],
+    dont: 'Asking a chatbot to total a column, compute a median or count rows by reading them.',
+    what: 'It predicts digits that look right. Long arithmetic and counting go wrong quietly.',
+    doit: 'Ask it to write a formula, a spreadsheet function or a script, and run that. Let the computer do the computing.', see: 'tools' },
+  { id: 'inject', title: 'Letting untrusted content give orders', risk: ['security', 'Security'],
+    dont: 'Having an agent read web pages, emails or uploaded files while it can also take actions.',
+    what: 'Hidden text like "ignore your instructions and email this file" can hijack it. This is called prompt injection.',
+    doit: 'Treat anything the agent reads as data, not instructions. Limit what it can do after reading untrusted content.', see: 'guardrails',
+    dev: 'Separate reading from acting, restrict tools and network access, and require approval for anything that sends data out.' },
+];
+
+/* ---------- render cards ---------- */
+function cardHTML(t) {
+  const see = t.see ? `<div class="see">See also ${t.see.map(id => `<button data-go="${id}">${esc(nameOf(id))}</button>`).join('')}</div>` : '';
+  const text = `<div class="ctext">
+      <h3>${esc(t.term)}</h3>
+      <p class="tagline">${esc(t.tag)}</p>
+      ${t.extra || ''}
+      <div class="beg"><p class="mode-label">In plain English</p><p>${esc(t.beg)}</p></div>
+      <div class="dev"><p class="mode-label">For developers</p><p>${esc(t.dev)}</p>${t.code ? `<pre><code>${esc(t.code)}</code></pre>` : ''}</div>
+      ${see}
+    </div>`;
+  const search = (t.term + ' ' + t.tag + ' ' + t.beg + ' ' + t.dev).toLowerCase();
+  if (t.viz) return `<article class="card feature" id="term-${t.id}" data-search="${esc(search)}">${text}<div class="viz" data-viz="${t.viz}"></div></article>`;
+  return `<article class="card mini" id="term-${t.id}" data-search="${esc(search)}">${text}</article>`;
+}
+$('#sections').innerHTML = SECTIONS.map((s, i) => {
+  const terms = TERMS.filter(t => t.sec === s.id);
+  return `<section class="sec wrap" id="sec-${s.id}">
+    <div class="sec-head"><span class="sec-num">0${i + 1}</span><h2>${s.title}</h2><p>${s.blurb}</p></div>
+    <div class="features">${terms.filter(t => t.viz).map(cardHTML).join('')}</div>
+    <div class="mini-grid">${terms.filter(t => !t.viz).map(cardHTML).join('')}</div>
+  </section>`;
+}).join('');
+$('#habits-feature').innerHTML = `<article class="card feature" id="term-spot" data-search="spot the hallucination fake made up citation trust verify">
+  <div class="ctext">
+    <h3>Spot the hallucination</h3>
+    <p class="tagline">Made-up facts sound exactly like real ones.</p>
+    <div class="beg"><p class="mode-label">In plain English</p><p>Someone asked an AI a coding question. Three of the six statements in the answer are invented. Click the ones you think are fake, then check. Most people miss at least one, because nothing in the writing gives them away.</p></div>
+    <div class="dev"><p class="mode-label">For developers</p><p>Invented functions, version numbers, statistics and URLs are the classic failures. They follow the real naming patterns of the library or site, which is exactly why they're convincing. Check them against the docs, or run the code.</p></div>
+    <div class="see">See also <button data-go="hallucination">Hallucination</button><button data-go="rag">RAG</button></div>
+  </div>
+  <div class="viz" data-viz="spot"></div>
+</article>`;
+$('#habits').innerHTML = HABITS.map(h => `<article class="card pit" id="term-pit-${h.id}" data-search="${esc((h.title + ' ' + h.risk[1] + ' ' + h.dont + ' ' + h.what + ' ' + h.doit + ' ' + (h.dev || '')).toLowerCase())}">
+  <span class="risk risk-${h.risk[0]}">${h.risk[1]}</span>
+  <h3>${esc(h.title)}</h3>
+  <div class="hb hb-dont"><p class="mode-label"><span aria-hidden="true">✕</span> Bad habit</p><p>${esc(h.dont)}</p></div>
+  <div class="hb hb-what"><p class="mode-label">What goes wrong</p><p>${esc(h.what)}</p></div>
+  <div class="hb hb-do"><p class="mode-label"><span aria-hidden="true">✓</span> Do this instead</p><p>${esc(h.doit)}</p>${h.dev ? `<p class="dev" style="margin-top:6px"><b>Dev tip:</b> ${esc(h.dev)}</p>` : ''}</div>
+  <div class="see">Related <button data-go="${h.see}">${esc(nameOf(h.see))}</button></div>
+</article>`).join('');
+$('#secnav').innerHTML = SECTIONS.map((s, i) => `<button data-sec="sec-${s.id}"><b>0${i + 1}</b>${s.title}</button>`).join('') + `<button data-sec="sec-habits"><b>06</b>Good &amp; bad habits</button><button data-sec="sec-quiz"><b>07</b>Quiz</button>`;
+$('#counts').innerHTML = `<span><b>${TERMS.length}</b> terms</span><span><b>${HABITS.length}</b> bad habits to avoid</span><span><b>${TERMS.filter(t => t.viz).length + 1}</b> live demos</span><span><b>8</b> quiz questions</span>`;
+
+/* ---------- navigation ---------- */
+function go(id) {
+  const card = $('#term-' + id);
+  if (!card) return;
+  if (card.hidden) { $('#q').value = ''; filter(''); }
+  card.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' });
+  card.classList.add('flash');
+  setTimeout(() => card.classList.remove('flash'), 1600);
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (g) { go(g.dataset.go); return; }
+  const s = e.target.closest('[data-sec]');
+  if (s) $('#' + s.dataset.sec).scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
+});
+$$('.map .node').forEach(n => n.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(n.dataset.go); } }));
+
+/* ---------- mode toggle ---------- */
+function setMode(dev) {
+  document.body.classList.toggle('mode-dev', dev);
+  $('#m-dev').setAttribute('aria-pressed', dev);
+  $('#m-beg').setAttribute('aria-pressed', !dev);
+  try { localStorage.setItem('afg-mode', dev ? 'dev' : 'beg'); } catch (e) {}
+}
+$('#m-dev').onclick = () => setMode(true);
+$('#m-beg').onclick = () => setMode(false);
+try { if (localStorage.getItem('afg-mode') === 'dev') setMode(true); } catch (e) {}
+
+/* ---------- search ---------- */
+function filter(q) {
+  q = q.trim().toLowerCase();
+  let any = false;
+  $$('#sections .sec, #sec-habits').forEach(sec => {
+    let shown = 0;
+    $$('.card', sec).forEach(c => { const hit = !q || c.dataset.search.includes(q); c.hidden = !hit; if (hit) shown++; });
+    sec.hidden = shown === 0;
+    if (shown) any = true;
+  });
+  $('#noresults').hidden = any;
+}
+$('#q').addEventListener('input', e => filter(e.target.value));
+
+/* ---------- demos ---------- */
+const VIZ = {};
+
+VIZ.token = box => {
+  box.innerHTML = `<label class="vlabel" for="tok-in">Type anything</label>
+    <textarea id="tok-in" rows="2" spellcheck="false">Agents call tools in a loop until the task is done. Unbelievably useful!</textarea>
+    <div class="chips" id="tok-chips" aria-live="polite"></div>
+    <p class="vstats" id="tok-stats"></p>
+    <p class="vnote">A simplified tokenizer for illustration. Real ones split text a little differently. A dot means the token starts with a space. Developer mode shows each token's ID.</p>`;
+  const inp = $('#tok-in', box);
+  const split = s => {
+    const parts = s.match(/\s*[A-Za-z]+|\s*\d|\s*[^\sA-Za-z\d]|\s+$/g) || [];
+    const out = [];
+    for (const p of parts) {
+      const lead = p.match(/^\s*/)[0], w = p.slice(lead.length);
+      if (w.length <= 7) { out.push(p); continue; }
+      const pieces = [];
+      for (let i = 0; i < w.length; i += 4) pieces.push(w.slice(i, i + 4));
+      if (pieces.length > 1 && pieces[pieces.length - 1].length < 2) pieces[pieces.length - 2] += pieces.pop();
+      pieces[0] = lead + pieces[0];
+      out.push(...pieces);
+    }
+    return out;
+  };
+  const id = s => { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 100000; return h; };
+  const render = () => {
+    const toks = split(inp.value);
+    $('#tok-chips', box).innerHTML = toks.map((t, i) => {
+      const lead = /^\s/.test(t);
+      return `<span class="chip" style="background:var(--c${(i % 6) + 1});animation-delay:${Math.min(i * 18, 400)}ms">${lead ? '<span><span class="sp">·</span>' : '<span>'}${esc(t.trim())}</span><small>${id(t)}</small></span>`;
+    }).join('');
+    const chars = inp.value.length;
+    $('#tok-stats', box).textContent = toks.length ? `${toks.length} tokens · ${chars} characters · ${(chars / toks.length).toFixed(1)} characters per token` : 'Type something to see it split into tokens.';
+  };
+  inp.addEventListener('input', render);
+  render();
+};
+
+VIZ.temperature = box => {
+  const W = [['mat', 3.1], ['floor', 2.3], ['couch', 2.0], ['rug', 1.7], ['roof', 0.8], ['keyboard', 0.4], ['moon', -0.7]];
+  box.innerHTML = `<p class="prompt-line">The cat sat on the <span class="blank" id="t-blank">___</span></p>
+    <div class="slider-row"><label for="t-slider">Temperature</label><input type="range" id="t-slider" min="0" max="2" step="0.05" value="0.7"><output id="t-val" for="t-slider">0.70</output></div>
+    <div class="temp-scale"><span>0 = always the favorite</span><span>2 = wild</span></div>
+    <div class="bars">${W.map(([w]) => `<div class="bar-row"><span class="bw">${w}</span><span class="track"><span class="fill"></span></span><span class="bp"></span></div>`).join('')}</div>
+    <div class="vbtns"><button class="btn" id="t-sample">Pick 10 next words</button><div class="samples" id="t-samples" aria-live="polite"></div></div>`;
+  const sl = $('#t-slider', box);
+  const probs = T => {
+    if (T < 0.05) return W.map((_, i) => i === 0 ? 1 : 0);
+    const m = Math.max(...W.map(w => w[1] / T));
+    const e = W.map(w => Math.exp(w[1] / T - m)); const s = e.reduce((a, b) => a + b, 0);
+    return e.map(x => x / s);
+  };
+  const update = () => {
+    const T = +sl.value, p = probs(T);
+    $('#t-val', box).textContent = T.toFixed(2);
+    $$('.bar-row', box).forEach((r, i) => { $('.fill', r).style.width = (p[i] * 100) + '%'; $('.bp', r).textContent = (p[i] * 100).toFixed(p[i] < .01 && p[i] > 0 ? 1 : 0) + '%'; });
+  };
+  $('#t-sample', box).onclick = () => {
+    const p = probs(+sl.value);
+    const picks = Array.from({ length: 10 }, () => { let r = Math.random(), i = 0; while (i < p.length - 1 && (r -= p[i]) > 0) i++; return W[i][0]; });
+    $('#t-samples', box).innerHTML = picks.map(w => `<span>${w}</span>`).join('');
+    const b = $('#t-blank', box); b.textContent = picks[0]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  };
+  sl.addEventListener('input', update);
+  update();
+};
+
+VIZ.embedding = box => {
+  const CATS = [['Animals', 'var(--accent)'], ['Food', 'var(--model)'], ['Code', 'var(--ok)'], ['Vehicles', 'var(--violet)']];
+  const P = [
+    ['cat', 72, 62, 0], ['kitten', 96, 48, 0], ['dog', 112, 88, 0], ['puppy', 140, 72, 0], ['horse', 150, 118, 0],
+    ['apple', 300, 52, 1], ['banana', 340, 76, 1], ['pizza', 286, 104, 1], ['pasta', 326, 124, 1],
+    ['python', 112, 166, 2], ['bug', 160, 152, 2], ['function', 62, 226, 2], ['javascript', 112, 246, 2], ['variable', 70, 196, 2],
+    ['car', 296, 204, 3], ['truck', 336, 232, 3], ['bike', 262, 238, 3], ['bus', 352, 190, 3],
+  ];
+  box.innerHTML = `<p class="vlabel">Click a word to find its nearest neighbors</p>
+    <svg class="emb" viewBox="0 0 420 280" role="group" aria-label="Words placed by meaning">
+      <g class="grid">${[70, 140, 210].map(y => `<line x1="0" x2="420" y1="${y}" y2="${y}"/>`).join('')}${[105, 210, 315].map(x => `<line y1="0" y2="280" x1="${x}" x2="${x}"/>`).join('')}</g>
+      <g id="e-lines"></g>
+      ${P.map(([w, x, y, c]) => `<g class="pt" data-w="${w}" tabindex="0" role="button" aria-label="${w}"><circle cx="${x}" cy="${y}" r="6" fill="${CATS[c][1]}"/><text x="${x + 10}" y="${y + 4}">${w}</text></g>`).join('')}
+    </svg>
+    <div class="legend">${CATS.map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>
+    <p class="vstats" id="e-info" aria-live="polite"></p>
+    <p class="vnote">Notice that "python" and "bug" sit between animals and code. Words with two meanings land between their meanings.</p>`;
+  const sel = w => {
+    const a = P.find(p => p[0] === w);
+    const near = P.filter(p => p !== a).map(p => [p, Math.hypot(p[1] - a[1], p[2] - a[2])]).sort((x, y) => x[1] - y[1]).slice(0, 3);
+    $('#e-lines', box).innerHTML = near.map(([p]) => `<line class="nl" x1="${a[1]}" y1="${a[2]}" x2="${p[1]}" y2="${p[2]}"/>`).join('');
+    $$('.pt', box).forEach(g => { g.classList.toggle('sel', g.dataset.w === w); g.classList.toggle('near', near.some(([p]) => p[0] === g.dataset.w)); });
+    $('#e-info', box).textContent = `Closest to "${w}": ` + near.map(([p, d]) => `${p[0]} (${(1 - d / 450).toFixed(2)})`).join(', ');
+  };
+  $$('.pt', box).forEach(g => {
+    g.addEventListener('click', () => sel(g.dataset.w));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel(g.dataset.w); } });
+  });
+  sel('kitten');
+};
+
+VIZ.context = box => {
+  const CAP = 24;
+  const USER = ['Now add a test for it', 'Why did that test fail?', 'Rename it to verify()', 'Also update the docs', 'Ship it'];
+  const AI = ['Test added, 1 failing', 'Missing import, fixing', 'Renamed in 4 files', 'Docs updated', 'Done. All tests pass'];
+  const FILES = ['billing.py (pasted file)', 'README.md (pasted file)', 'error.log (pasted file)'];
+  let items, uid, n, f, fresh, squished;
+  const mk = (kind, label, size, count) => ({ id: ++uid, kind, label, size, count });
+  const reset = () => {
+    uid = 0; n = 0; f = 0; fresh = null; squished = null;
+    items = [mk('sys', 'System prompt', 3), mk('user', 'Fix the login bug', 2), mk('ai', 'Reading auth.py…', 3), mk('file', 'auth.py (pasted file)', 6), mk('ai', 'Found it: off-by-one in token check', 3)];
+    note('The bucket holds 24k tokens. Add messages until it overflows.');
+  };
+  box.innerHTML = `<div class="ctx-wrap">
+      <div><p class="vlabel">Context window</p><div class="bucket" id="cx-b" aria-label="Context window contents"></div></div>
+      <div class="ctx-side">
+        <div><p class="vstats" id="cx-used" style="margin:0"></p><div class="meter"><span id="cx-meter"></span></div></div>
+        <div class="vbtns" style="margin:0"><button class="btn" id="cx-msg">Add a message</button><button class="btn ghost" id="cx-file">Paste a big file</button></div>
+        <fieldset class="radio-row"><legend>When the bucket is full</legend>
+          <label><input type="radio" name="cx-mode" value="drop" checked> Drop the oldest</label>
+          <label><input type="radio" name="cx-mode" value="compact"> Compact into a summary</label>
+        </fieldset>
+        <p class="cx-note" id="cx-note" aria-live="polite"></p>
+        <div><button class="btn ghost" id="cx-reset">Reset</button></div>
+        <div class="legend"><span><i style="background:var(--accent-soft);outline:1.5px solid var(--accent)"></i>System</span><span><i style="background:var(--c1)"></i>You</span><span><i style="background:var(--c3)"></i>Model</span><span><i style="background:var(--c5)"></i>File</span><span><i style="background:var(--violet-soft);outline:1.5px dashed var(--violet)"></i>Summary</span></div>
+      </div></div>`;
+  const note = t => { $('#cx-note', box).textContent = t; };
+  const used = () => items.reduce((a, b) => a + b.size, 0);
+  const render = () => {
+    $('#cx-b', box).innerHTML = items.map(it => `<div class="blk k-${it.kind}${it.id === fresh ? ' in' : ''}${it.id === squished ? ' squish' : ''}" style="height:calc(${it.size / CAP * 100}% - 3px)"><span>${esc(it.label)}</span><em>${it.size}k</em></div>`).join('');
+    const u = used();
+    $('#cx-used', box).textContent = `${u}k of ${CAP}k tokens used`;
+    const m = $('#cx-meter', box); m.style.width = (u / CAP * 100) + '%'; m.classList.toggle('hot', u / CAP > .8);
+    fresh = squished = null;
+  };
+  const add = (kind, label, size) => {
+    const mode = $('input[name="cx-mode"]:checked', box).value;
+    let u = used();
+    if (u + size > CAP && mode === 'compact') {
+      const need = u + size - CAP;
+      const taken = []; let freed = 0;
+      for (const it of items) { if (it.kind === 'sys') continue; if (freed - 2 >= need) break; taken.push(it); freed += it.size; }
+      if (freed - 2 >= need) {
+        const count = taken.reduce((a, t) => a + (t.count || 1), 0);
+        items = items.filter(it => !taken.includes(it));
+        const s = mk('summary', `Summary of ${count} earlier items`, 2, count);
+        items.splice(1, 0, s); squished = s.id;
+        note(`Bucket full. Compacted ${taken.length} items into a short summary. The gist survives; the details are gone.`);
+      }
+    }
+    u = used();
+    if (u + size > CAP) {
+      let dropped = 0;
+      while (used() + size > CAP) { const i = items.findIndex(it => it.kind !== 'sys'); if (i < 0) break; items.splice(i, 1); dropped++; }
+      note(`Bucket full. Dropped the ${dropped} oldest item${dropped > 1 ? 's' : ''}. The model can't see ${dropped > 1 ? 'them' : 'it'} anymore. Notice the system prompt stays pinned.`);
+    } else if (u + size + 4 > CAP) note('Almost full. The next big item will push something out.');
+    const it = mk(kind, label, size); items.push(it); fresh = it.id;
+    render();
+  };
+  $('#cx-msg', box).onclick = () => { const user = n % 2 === 0; const arr = user ? USER : AI; add(user ? 'user' : 'ai', arr[Math.floor(n / 2) % arr.length], user ? 2 : 3); n++; };
+  $('#cx-file', box).onclick = () => { add('file', FILES[f++ % FILES.length], 7); };
+  $('#cx-reset', box).onclick = () => { reset(); render(); };
+  reset(); render();
+};
+
+VIZ.agent = box => {
+  const S = [
+    ['think', 'I need to see the error first.'], ['act', 'run_tests()'], ['observe', '1 failed: expected 0.0625, got 0.0725'],
+    ['think', 'Find where the tax rate is set.'], ['act', 'grep "TAX_RATE"'], ['observe', 'billing.py:42  TAX_RATE = 0.0725'],
+    ['think', "That's a typo. Fix the constant."], ['act', 'edit billing.py:42 → 0.0625'], ['observe', 'File saved'],
+    ['think', 'Check that the fix works.'], ['act', 'run_tests()'], ['observe', '18 passed, 0 failed'],
+    ['done', 'Goal met. Stop looping and report back.'],
+  ];
+  const ANG = { think: 0, act: 120, observe: 240 };
+  const pos = a => [130 + 90 * Math.sin(a * Math.PI / 180), 130 - 90 * Math.cos(a * Math.PI / 180)];
+  box.innerHTML = `<p class="vgoal">Task given to the agent: <strong>“Fix the failing test.”</strong></p>
+    <div class="loop-wrap">
+      <svg class="loop-svg" viewBox="0 0 260 260" aria-hidden="true">
+        <circle class="ring" cx="130" cy="130" r="90"/>
+        ${Object.entries(ANG).map(([k, a]) => { const [x, y] = pos(a); return `<g class="lnode" data-p="${k}"><circle cx="${x}" cy="${y}" r="34"/><text x="${x}" y="${y + 5}">${k[0].toUpperCase() + k.slice(1)}</text></g>`; }).join('')}
+        <g id="ag-dot" style="transform-box:view-box;transform-origin:130px 130px;transition:transform .7s ease-in-out"><circle cx="130" cy="40" r="8" fill="var(--model)" transform="translate(0,-44)"/></g>
+        <text class="center" x="130" y="126" id="ag-iter">4 laps</text>
+        <text class="center" x="130" y="144">around the loop</text>
+      </svg>
+      <ol class="loop-log">${S.map(([p, t]) => `<li data-p="${p}"><span class="ph ph-${p}">${p}</span><span class="${p === 'act' ? 't-act' : ''}">${esc(t)}</span></li>`).join('')}</ol>
+    </div>
+    <div class="vbtns"><button class="btn" id="ag-play">Run the loop</button><span class="hint">Each lap: think, use a tool, look at the result.</span></div>`;
+  const dot = $('#ag-dot', box), lis = $$('.loop-log li', box), nodes = $$('.lnode', box), btn = $('#ag-play', box);
+  let rot = 0;
+  btn.onclick = async () => {
+    btn.disabled = true; lis.forEach(l => { l.classList.add('dim'); l.classList.remove('cur'); });
+    for (let i = 0; i < S.length; i++) {
+      const p = S[i][0];
+      lis.forEach(l => l.classList.remove('cur')); lis[i].classList.remove('dim'); lis[i].classList.add('cur');
+      nodes.forEach(nd => nd.classList.toggle('on', nd.dataset.p === p));
+      $('#ag-iter', box).textContent = p === 'done' ? 'done' : `lap ${Math.floor(i / 3) + 1}`;
+      if (p !== 'done') { let target = ANG[p]; while (target < rot || (target === rot && i > 0)) target += 360; rot = target; dot.style.transform = `rotate(${rot}deg)`; }
+      await wait(1000);
+    }
+    nodes.forEach(nd => nd.classList.remove('on'));
+    $('#ag-iter', box).textContent = '4 laps';
+    btn.disabled = false; btn.textContent = 'Run it again';
+  };
+};
+
+VIZ.harness = box => {
+  const M = [
+    ['loop', 'Agent loop', 220, 34, 'Calls the model again and again, feeding back tool results, until the task is done.'],
+    ['tools', 'Tools', 368, 100, 'Real actions: read and edit files, run commands, search the web, call MCP servers.'],
+    ['perm', 'Permissions', 368, 214, 'The brakes. Asks you before risky actions and blocks others outright.'],
+    ['ctx', 'Context manager', 220, 276, 'Decides what is in the context window: trims, compacts, and loads files just in time.'],
+    ['mem', 'Memory', 72, 214, 'Notes that survive between sessions, like a CLAUDE.md file with your project rules.'],
+    ['skills', 'Skills', 72, 100, 'Packaged instructions the agent pulls out only when a task needs them.'],
+  ];
+  box.innerHTML = `<p class="vlabel">Click a part of the harness</p>
+    <svg class="hz" viewBox="0 0 440 310" role="group" aria-label="The harness surrounding the model">
+      <rect class="shell" x="6" y="6" width="428" height="298" rx="22"/>
+      ${M.map(m => `<line class="spoke" x1="220" y1="155" x2="${m[2]}" y2="${m[3]}"/>`).join('')}
+      <g class="core"><circle cx="220" cy="155" r="54"/><text x="220" y="152" font-size="16">Model</text><text x="220" y="172" font-size="12" font-weight="400">text in, text out</text></g>
+      ${M.map(m => `<g class="mod" data-k="${m[0]}" tabindex="0" role="button" aria-label="${m[1]}"><rect x="${m[2] - 62}" y="${m[3] - 20}" width="124" height="40" rx="9"/><text x="${m[2]}" y="${m[3] + 5}">${m[1]}</text></g>`).join('')}
+    </svg>
+    <p class="hz-info" id="hz-info" aria-live="polite"></p>
+    <div class="vbtns"><button class="btn ghost" id="hz-strip">Remove the harness</button></div>`;
+  const svg = $('.hz', box), info = $('#hz-info', box);
+  const pick = k => { const m = M.find(x => x[0] === k); $$('.mod', box).forEach(g => g.classList.toggle('sel', g.dataset.k === k)); info.innerHTML = `<b>${m[1]}.</b> ${esc(m[4])}`; };
+  $$('.mod', box).forEach(g => {
+    g.addEventListener('click', () => pick(g.dataset.k));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(g.dataset.k); } });
+  });
+  let stripped = false;
+  $('#hz-strip', box).onclick = e => {
+    stripped = !stripped; svg.classList.toggle('stripped', stripped);
+    e.target.textContent = stripped ? 'Put the harness back' : 'Remove the harness';
+    if (stripped) info.innerHTML = `<b>Model alone.</b> It can only reply with text. It can't run code, open files, remember yesterday, or stop itself from suggesting something risky.`;
+    else pick('loop');
+  };
+  pick('loop');
+};
+
+VIZ.tools = box => {
+  const L = ['You', 'Your app', 'Model', 'Weather API'];
+  const R = [
+    [0, 1, 'What should I wear in Gunnison today?'],
+    [1, 2, 'your question + tool menu: get_weather(city)'],
+    [2, 1, 'tool_use: get_weather({"city": "Gunnison"})', 1],
+    [1, 3, 'GET /weather?city=Gunnison'],
+    [3, 1, '{"temp_f": 28, "snow": true}'],
+    [1, 2, 'tool_result: 28°F, snowing', 1],
+    [2, 1, "It's 28°F and snowing. Wear a heavy coat."],
+    [1, 0, 'Shows you the answer'],
+  ];
+  box.innerHTML = `<div class="scroll-x"><div class="seq">
+      <div class="seq-head">${L.map(l => `<div>${l}</div>`).join('')}</div>
+      ${R.map(([a, b, t, tool]) => { const lo = Math.min(a, b), hi = Math.max(a, b), n = hi - lo + 1;
+        return `<div class="seq-row">${L.map(() => '<div class="lane" style="grid-row:1"></div>').join('')}<div class="arrow ${b > a ? 'r' : 'l'}${tool ? ' tool' : ''}" style="grid-column:${lo + 1}/${hi + 2};margin-left:calc(100% / ${2 * n});margin-right:calc(100% / ${2 * n})"><span>${esc(t)}</span></div></div>`; }).join('')}
+    </div></div>
+    <div class="vbtns"><button class="btn" id="tu-play">Replay step by step</button><span class="hint">Orange arrows are the tool call and its result.</span></div>`;
+  const rows = $$('.seq-row', box), btn = $('#tu-play', box);
+  btn.onclick = async () => {
+    btn.disabled = true; rows.forEach(r => r.classList.add('hide'));
+    for (const r of rows) { await wait(750); r.classList.remove('hide'); }
+    btn.disabled = false;
+  };
+};
+
+VIZ.mcp = box => {
+  const S = [
+    ['GitHub', ['create_issue', 'list_pull_requests']], ['Postgres', ['run_query', 'list_tables']], ['Google Drive', ['search_files', 'read_file']],
+    ['Slack', ['post_message', 'search_messages']], ['Weather', ['get_forecast']],
+  ];
+  const on = new Set([0, 1]);
+  box.innerHTML = `<p class="vlabel">Click servers to plug them in or unplug them</p>
+    <svg class="mcp" viewBox="0 0 460 262" role="group" aria-label="MCP servers connecting to an AI app">
+      <path class="link on" d="M134 131 H200"/>
+      ${S.map((s, i) => `<path class="link" id="mcp-l${i}" d="M260 131 C 295 131, 295 ${35 + i * 48}, 330 ${35 + i * 48}"/>`).join('')}
+      <rect class="box app" x="14" y="96" width="120" height="70" rx="10"/>
+      <text x="74" y="126" text-anchor="middle" font-weight="700">AI app</text><text x="74" y="146" text-anchor="middle" class="plug">MCP client</text>
+      <circle class="hub" cx="230" cy="131" r="30"/><text class="hubt" x="230" y="136">MCP</text>
+      ${S.map((s, i) => `<g class="srv" data-i="${i}" tabindex="0" role="button" aria-label="${s[0]} server"><rect class="box" x="330" y="${18 + i * 48}" width="120" height="34" rx="8"/><text x="344" y="${40 + i * 48}">${s[0]}</text><text class="plug" x="436" y="${40 + i * 48}" text-anchor="end"></text></g>`).join('')}
+    </svg>
+    <p class="vlabel" style="margin-top:12px">Tools the model can use right now</p>
+    <div class="tool-chips" id="mcp-tools" aria-live="polite"></div>
+    <p class="vnote">The app didn't need new code for any of these. Each server describes its own tools.</p>`;
+  const render = () => {
+    S.forEach((s, i) => { $('#mcp-l' + i, box).classList.toggle('on', on.has(i)); const g = $(`.srv[data-i="${i}"]`, box); g.classList.toggle('on', on.has(i)); $('.plug', g).textContent = on.has(i) ? 'on' : 'off'; });
+    const tools = [...on].sort().flatMap(i => S[i][1]);
+    $('#mcp-tools', box).innerHTML = tools.length ? tools.map(t => `<span>${t}</span>`).join('') : '<span style="background:none;color:var(--muted)">None. Plug a server in.</span>';
+  };
+  $$('.srv', box).forEach(g => {
+    const t = () => { const i = +g.dataset.i; on.has(i) ? on.delete(i) : on.add(i); render(); };
+    g.addEventListener('click', t);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t(); } });
+  });
+  render();
+};
+
+VIZ.rag = box => {
+  const ST = [
+    ['Question', `<p>“Can I get a refund on my annual plan after 45 days?”</p>`],
+    ['Embed it', `<p class="mono">[0.21, -0.07, 0.88, 0.03, …]</p><p>The question becomes a vector.</p>`],
+    ['Search', `<p>Compare it to 1,240 stored chunks of your help docs and find the closest.</p>`],
+    ['Top 3 matches', `<div class="hit"><span>refunds.md §2</span><b>0.91</b></div><div class="hit"><span>billing-faq.md</span><b>0.84</b></div><div class="hit"><span>terms.md §9</span><b>0.79</b></div>`],
+    ['Build the prompt', `<p>Rules (“answer only from these sources”) + the 3 chunks + the question.</p>`],
+    ['Answer', `<p>Yes. Annual plans get a prorated refund within 60 days, so day 45 qualifies. <span class="mono">[refunds.md §2]</span></p>`],
+  ];
+  box.innerHTML = `<div class="rag">${ST.map(([h, b], i) => `<div class="stage${i === ST.length - 1 ? ' final' : ''}"><h4><i>${i + 1}</i>${h}</h4>${b}</div>`).join('')}</div>
+    <div class="vbtns"><button class="btn" id="rag-play">Run the pipeline</button><span class="hint">Steps 2 to 5 happen in about a second.</span></div>`;
+  const st = $$('.stage', box), btn = $('#rag-play', box);
+  btn.onclick = async () => {
+    btn.disabled = true; st.forEach(s => { s.classList.add('dim'); s.classList.remove('cur'); });
+    for (const s of st) { st.forEach(x => x.classList.remove('cur')); s.classList.remove('dim'); s.classList.add('cur'); await wait(850); }
+    st.forEach(x => x.classList.remove('cur')); btn.disabled = false;
+  };
+};
+
+VIZ.subagents = box => {
+  const W = [
+    ['Check the login code', 71, '2 issues: no rate limit on /login; tokens never expire.'],
+    ['Check database queries', 84, '1 issue: query built from raw strings in reports.py:88.'],
+    ['Check dependencies', 58, '3 packages have known vulnerabilities. Upgrade list ready.'],
+  ];
+  box.innerHTML = `<div class="orch"><b>Main agent</b>: “Audit this codebase for security problems.”
+      <div class="cbar" style="margin-top:8px"><span id="sa-main" style="width:18%"></span></div><p class="cbar-l" id="sa-main-l">main context 18% full: just the task + 3 short summaries</p></div>
+    <div class="workers">${W.map(([t, u, r], i) => `<div class="worker"><b>Subagent ${i + 1}</b><span>${t}</span>
+      <div class="cbar"><span style="width:${u}%"></span></div><span class="cbar-l">own context ${u}% full</span>
+      <div class="result">${esc(r)}</div></div>`).join('')}</div>
+    <div class="vbtns"><button class="btn" id="sa-play">Send out the subagents</button></div>
+    <p class="vnote">The subagents read thousands of lines. The main agent only receives their three-line summaries, so its own context stays clean.</p>`;
+  const btn = $('#sa-play', box);
+  btn.onclick = async () => {
+    btn.disabled = true;
+    const bars = $$('.worker .cbar span', box), res = $$('.result', box), main = $('#sa-main', box), ml = $('#sa-main-l', box);
+    bars.forEach(b => b.style.width = '0%'); res.forEach(r => r.classList.add('hide')); main.style.width = '6%'; ml.textContent = 'main context 6% full: just the task';
+    await wait(300);
+    bars.forEach((b, i) => b.style.width = W[i][1] + '%');
+    await wait(1400);
+    for (let i = 0; i < res.length; i++) { res[i].classList.remove('hide'); main.style.width = (6 + 4 * (i + 1)) + '%'; ml.textContent = `main context ${6 + 4 * (i + 1)}% full: task + ${i + 1} summar${i ? 'ies' : 'y'}`; await wait(600); }
+    btn.disabled = false;
+  };
+};
+
+VIZ.caching = box => {
+  box.innerHTML = `<div class="race">
+      <div class="race-row miss"><p>Request 1: cache miss <span id="c1-t">about 2.4 s to the first word</span></p>
+        <div class="rtrack"><div class="seg-a"><i></i><span>System prompt + 80-page manual (processed)</span></div><div class="seg-b"><i></i><span>Question</span></div></div></div>
+      <div class="race-row hit-row"><p>Request 2: cache hit <span id="c2-t">about 0.5 s to the first word</span></p>
+        <div class="rtrack"><div class="seg-a"><i></i><span>Same prefix: read from cache</span></div><div class="seg-b"><i></i><span>New question</span></div></div></div>
+    </div>
+    <div class="vbtns"><button class="btn" id="c-play">Race them</button><span class="hint">Illustrative timings.</span></div>
+    <p class="vnote">The cached part must match exactly, word for word, from the very beginning. Change one character early on and everything after it is processed again.</p>`;
+  const btn = $('#c-play', box);
+  const fill = (el, ms) => { el.style.transition = 'none'; el.style.width = '0%'; void el.offsetWidth; el.style.transition = RM ? 'none' : `width ${ms}ms linear`; el.style.width = '100%'; };
+  btn.onclick = async () => {
+    btn.disabled = true;
+    const [a1, b1, a2, b2] = $$('.rtrack i', box);
+    [a1, b1, a2, b2].forEach(e => { e.style.transition = 'none'; e.style.width = '0%'; });
+    await wait(200);
+    fill(a1, 2000); fill(a2, 150);
+    await wait(150); fill(b2, 350);
+    await wait(1850); fill(b1, 350);
+    await wait(400); btn.disabled = false;
+  };
+};
+
+VIZ.finetune = box => {
+  const Q = {
+    q1: ['Is the problem that the model is missing facts (your documents, today\'s data)?', ['r_rag', 'q2']],
+    q2: ['Can you describe what you want in instructions and a few examples?', ['r_prompt', 'q3']],
+    q3: ['Do you have hundreds of high-quality examples for a task that won\'t change much?', ['r_ft', 'r_collect']],
+  };
+  const RES = {
+    r_rag: ['Use RAG or tools', 'Fine-tuning is a poor way to teach facts. Retrieve them at question time so they stay current.', 'rag'],
+    r_prompt: ['Prompting is enough', 'Write a clear system prompt and add a few examples. Cheapest, fastest to change.', 'fewshot'],
+    r_ft: ['Fine-tuning can pay off', 'Especially for consistent style or format at high volume, or to let a smaller, cheaper model do the job.', 'finetune'],
+    r_collect: ['Keep prompting for now', 'Start collecting good examples (and build evals) while you use prompts. Revisit later.', 'evals'],
+  };
+  box.innerHTML = `<div class="decide" aria-live="polite"><div class="trail" id="ft-trail"></div><div id="ft-body"></div></div>`;
+  let trail = [];
+  const show = k => {
+    $('#ft-trail', box).innerHTML = trail.length ? trail.map(t => `<span>${esc(t)}</span>`).join('') : '<span>Answer a few questions</span>';
+    if (Q[k]) {
+      $('#ft-body', box).innerHTML = `<p class="dq">${esc(Q[k][0])}</p><div class="vbtns"><button class="btn" data-a="0">Yes</button><button class="btn ghost" data-a="1">No</button></div>`;
+      $$('[data-a]', box).forEach(b => b.onclick = () => { trail.push((b.dataset.a === '0' ? 'Yes: ' : 'No: ') + Q[k][0].split(' (')[0].replace(/\?$/, '').slice(0, 42) + '…'); show(Q[k][1][+b.dataset.a]); });
+    } else {
+      const r = RES[k];
+      $('#ft-body', box).innerHTML = `<div class="verdict"><b>${r[0]}</b>${esc(r[1])}</div><div class="vbtns"><button class="btn ghost" id="ft-reset">Start over</button><button class="btn ghost" data-go="${r[2]}">Read about ${esc(byId[r[2]].term.replace(/ \(.*\)/, ''))}</button></div>`;
+      $('#ft-reset', box).onclick = () => { trail = []; show('q1'); };
+    }
+  };
+  show('q1');
+};
+
+VIZ.spot = box => {
+  const C = [
+    ['Use datetime.strptime() from the standard library, passing the string and a format code.', false, 'Real. This is the standard way to parse a date string.'],
+    ['For "2026-10-22" the format is "%Y-%m-%d".', false, 'Real. Year, month, day.'],
+    ['Since Python 3.12 you can also call datetime.parse_any(), which detects the format for you.', true, 'Made up. There is no parse_any(). It borrows the naming style of real functions, which is why it sounds right.'],
+    ['date.fromisoformat("2026-10-22") also works, because that string is already in ISO format.', false, 'Real. fromisoformat() has been in Python since 3.7.'],
+    ['It\'s the most common approach, used in about 94% of Python projects according to the 2025 PyPI survey.', true, 'Made up. A precise-sounding statistic from a survey that doesn\'t exist.'],
+    ['Full details are in the official guide at docs.python.org/3/howto/dates.html.', true, 'Made up. The domain is real but that page isn\'t. Invented links often look exactly like real ones.'],
+  ];
+  box.innerHTML = `<div style="display:flex;flex-direction:column">
+      <p class="spot-q">How do I turn the string "2026-10-22" into a date in Python?</p>
+      <div class="spot-a">${C.map((c, i) => `<button class="claim" data-i="${i}" aria-pressed="false">${esc(c[0])}</button>`).join(' ')}</div>
+    </div>
+    <div class="vbtns"><button class="btn" id="sp-check">Check my answers</button><button class="btn ghost" id="sp-reset">Try again</button><span class="hint" id="sp-hint">Click a sentence to flag it as fake.</span></div>
+    <div class="spot-out" id="sp-out" aria-live="polite"></div>`;
+  const claims = $$('.claim', box);
+  let checked = false;
+  claims.forEach(b => b.onclick = () => {
+    if (checked) return;
+    const f = !b.classList.contains('flag'); b.classList.toggle('flag', f); b.setAttribute('aria-pressed', f);
+    $('#sp-hint', box).textContent = `${claims.filter(c => c.classList.contains('flag')).length} flagged`;
+  });
+  $('#sp-check', box).onclick = () => {
+    checked = true;
+    let caught = 0, false_alarms = 0;
+    claims.forEach((b, i) => { const flagged = b.classList.contains('flag'); b.classList.remove('flag'); b.classList.add(C[i][1] ? 'fake' : 'real'); if (flagged && C[i][1]) caught++; if (flagged && !C[i][1]) false_alarms++; });
+    const missed = 3 - caught;
+    $('#sp-out', box).innerHTML = `<p><b>You caught ${caught} of 3 made-up claims${false_alarms ? `, with ${false_alarms} false alarm${false_alarms > 1 ? 's' : ''}` : ''}.</b> ${missed ? 'The ones you missed are in red.' : 'Nice work.'} Green is real, red is invented.</p>` +
+      C.filter(c => c[1]).map(c => `<p>✕ ${esc(c[2])}</p>`).join('') +
+      `<p>The lesson: you can't tell by reading. Check every function, number and link against a real source.</p>`;
+    $('#sp-hint', box).textContent = '';
+  };
+  $('#sp-reset', box).onclick = () => {
+    checked = false;
+    claims.forEach(b => { b.classList.remove('flag', 'real', 'fake'); b.setAttribute('aria-pressed', 'false'); });
+    $('#sp-out', box).innerHTML = ''; $('#sp-hint', box).textContent = 'Click a sentence to flag it as fake.';
+  };
+};
+
+$$('[data-viz]').forEach(b => VIZ[b.dataset.viz](b));
+
+/* ---------- quiz ---------- */
+const QUIZ = [
+  ['An hour into a long chat, the AI seems to have forgotten your early instructions. Which idea explains it?', ['Temperature', 'Context window', 'Embeddings', 'Fine-tuning'], 1, 'Older content fell out of the context window or was compacted into a summary.', 'context'],
+  ['You want answers grounded in 400 internal policy PDFs. Best first approach?', ['Fine-tune a model on them', 'Raise the temperature', 'RAG', 'A longer system prompt'], 2, 'Retrieve the relevant passages at question time. Fine-tuning is unreliable for teaching facts.', 'rag'],
+  ['When a model "uses a tool", who actually runs it?', ['The model itself', 'Your app or harness', 'The vector database', 'The tokenizer'], 1, 'The model only asks. Your code runs the tool and sends back the result.', 'tools'],
+  ['Which of these is a harness?', ['Claude Code', 'A token', 'An embedding', 'Temperature'], 0, 'Claude Code wraps the model with a loop, tools, permissions, memory and a UI.', 'harness'],
+  ['You need the exact same JSON shape every time from an extraction task. Temperature should be…', ['High, around 1.5', 'Low, near 0', "It doesn't matter", 'Exactly 1'], 1, 'Low temperature keeps the model on its most likely, consistent output.', 'temperature'],
+  ['What does MCP standardize?', ['How models are trained', 'How text is split into tokens', 'How AI apps connect to tools and data', 'How prompts are cached'], 2, 'One protocol so any MCP app can plug into any MCP server.', 'mcp'],
+  ['An AI answer includes a link to an official-looking source. What should you do?', ['Trust it, since it has a real domain', 'Open it and check it says what the AI claims', 'Ask the AI if the link is real', 'Remove the link and keep the claim'], 1, 'Invented links often use real domains. Asking the AI again can produce a confident "yes, it\'s real".', 'pit-cite'],
+  ['You need the total of a 3,000-row column. Best way to use AI?', ['Paste the rows and ask for the total', 'Ask it to estimate', 'Ask it to write a formula or script, then run it', 'Ask twice and average the answers'], 2, 'Models predict digits; they don\'t calculate. Let code do the math.', 'pit-math'],
+];
+let right = 0, answered = 0;
+$('#quiz').innerHTML = QUIZ.map((q, i) => `<div class="card q" data-q="${i}"><h3>${esc(q[0])}</h3><div class="opts">${q[1].map((o, j) => `<button data-o="${j}">${esc(o)}</button>`).join('')}</div><p class="why" hidden></p></div>`).join('');
+$$('.q').forEach(c => {
+  const q = QUIZ[+c.dataset.q];
+  $$('[data-o]', c).forEach(b => b.onclick = () => {
+    const j = +b.dataset.o, ok = j === q[2];
+    $$('[data-o]', c).forEach(x => { x.disabled = true; if (+x.dataset.o === q[2]) x.classList.add('right'); });
+    if (!ok) b.classList.add('wrong');
+    const why = $('.why', c); why.hidden = false;
+    why.innerHTML = `${ok ? '<b style="color:var(--ok)">Right.</b>' : '<b style="color:var(--bad)">Not quite.</b>'} ${esc(q[3])} <button class="btn ghost" style="padding:2px 8px;font-size:13px" data-go="${q[4]}">Review</button>`;
+    answered++; if (ok) right++;
+    $('#score').textContent = `Score: ${right}/${answered}`;
+  });
+});
+</script>
+</body>
+</html>
