@@ -11,18 +11,27 @@ Every term has two explanations, and a toggle at the top switches between them:
 
 ## What's inside
 
-| Section | Terms |
+The guide is split into tabs that build on each other. Work through them in order or jump around; search covers every tab.
+
+| Tab | What's in it |
 |---|---|
-| 01 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
-| 02 Talking to models | prompt, system prompt, few-shot prompting, reasoning, structured output |
-| 03 Giving models abilities | tool use, MCP, RAG, vector database |
-| 04 Agents | agent, harness, subagents, agentic AI, skills, memory, compaction, context engineering |
-| 05 Shipping it | prompt caching, fine-tuning vs prompting, evals, guardrails, latency & cost |
-| 06 Good habits, bad habits | 9 common mistakes, what goes wrong, and what to do instead |
-| 07 Check yourself | a 9-question quiz |
+| Start here | A clickable map of how the pieces fit together, and a suggested path |
+| 01 History & math | A timeline from Turing (1950) to agents (2025), words as vectors, attention, the five formulas behind it all, and why nobody fully understands what's inside a model |
+| 02 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
+| 03 Prompting | prompt engineering, system prompt, few-shot prompting, reasoning, structured output |
+| 04 Tools & skills | tools vs skills vs the agent loop, tool use, MCP, RAG, vector database, skills |
+| 05 Agents | agent, harness, subagents, agentic AI, memory, compaction, context engineering |
+| 06 Shipping it | prompt caching, fine-tuning vs prompting, evals, guardrails, latency & cost |
+| 07 Good & bad habits | 10 common mistakes, what goes wrong, and what to do instead |
+| 08 Quiz | 13 questions |
 
 ## Live demos
 
+- **Prompt playground**: type any prompt (typos welcome) and a toy model scores it on goal, context, audience, format, constraints and examples, then answers with something silly that gets better as your prompt does
+- **Tool, skill, or neither?**: a 9-question guessing game
+- **Words as vectors**: king − man + woman, step by step
+- **Attention**: change one word and watch what "it" refers to
+- **A model's weights**: a peek at the numbers inside a model, and what a "feature" is
 - **Tokens**: type a sentence and watch it split into tokens
 - **Temperature**: a slider that reshapes the odds for the model's next word
 - **Embeddings**: a meaning map; click a word to see its nearest neighbors
@@ -38,22 +47,30 @@ Every term has two explanations, and a toggle at the top switches between them:
 - **Fine-tuning vs prompting**: a yes/no decision helper
 - **Spot the hallucination**: find the three made-up claims hidden in an AI answer
 
-The overview map at the top is clickable, and there's a search box for jumping straight to a term.
-
 ## Running it locally
 
-It's a single HTML file with no build step and no dependencies apart from Google Fonts.
+Plain HTML, CSS and JavaScript with no build step and no dependencies apart from Google Fonts.
 
 ```bash
 git clone https://github.com/Eesterlein/ai-field-guide.git
 cd ai-field-guide
-open index.html          # or: python3 -m http.server 8000
+python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
-## Built with
+## How it's organized
 
-Plain HTML, CSS and JavaScript, with inline SVG for the diagrams. No frameworks. It works on phones, follows the system's light or dark mode, and respects the reduced-motion setting.
+| File | What it holds |
+|---|---|
+| `index.html` | Page shell, header, tabs and the overview map |
+| `style.css` | All styles, with light and dark themes |
+| `js/content.js` | Every term, habit, quiz question, timeline entry and formula |
+| `js/demos.js` | The interactive demos |
+| `js/app.js` | Tabs, search, the Plain English / Developer toggle and the quiz |
+
+To add a term, add an entry to `TERMS` in `js/content.js`. Give it a `viz` name and a matching function in `js/demos.js` if it needs a demo.
+
+It works on phones, follows the system's light or dark mode, and respects the reduced-motion setting.
 
 ## A note on accuracy
 
-The demos are simplified pictures of how these systems behave, not real model internals. The tokenizer is an approximation, and the timings, similarity scores and context-confusion curve are illustrative. The curve's shape follows *Lost in the Middle* (Liu et al., 2023) and Chroma's *Context Rot* study (2025).
+The demos are simplified pictures of how these systems behave, not real model internals. The tokenizer and the prompt playground's scoring are approximations, and the timings, similarity scores, attention weights and context-confusion curve are illustrative. The context-confusion curve's shape follows *Lost in the Middle* (Liu et al., 2023) and Chroma's *Context Rot* study (2025).
