@@ -317,6 +317,24 @@ body.mode-dev .chip small { display: block; }
 .layer.l-sys { background: var(--accent-soft); outline: 1.5px solid var(--accent); font-weight: 700; }
 .layer.l-new { background: var(--c1); }
 
+/* context confusion */
+.blk.faint { opacity: .4; }
+.cf-chart { width: 100%; height: auto; display: block; }
+.cf-chart .gl { stroke: var(--line); stroke-width: 1; }
+.cf-chart .ax { font-size: 11.5px; fill: var(--muted); }
+.cf-chart .curve { fill: none; stroke: var(--accent); stroke-width: 3; transition: d .3s; }
+.cf-chart .area { fill: var(--accent-soft); }
+.cf-chart .mk { fill: var(--model); stroke: var(--surface); stroke-width: 3; }
+.cf-chart .mk-line { stroke: var(--model); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.cf-chart .mk-label { font-size: 13px; font-weight: 700; fill: var(--ink); font-family: var(--font-mono); }
+.cf-read { font-size: 15px; margin-top: 6px; }
+.cf-read b { font-family: var(--font-mono); color: var(--model); }
+.cf-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cf-types div { background: var(--sunk); border-radius: 8px; padding: 8px 10px; font-size: 13.5px; display: flex; flex-direction: column; gap: 2px; }
+.cf-types b { font-family: var(--font-display); font-size: 14.5px; }
+.cf-src { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 560px) { .cf-types { grid-template-columns: minmax(0, 1fr); } }
+
 /* habits */
 .pit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; }
 .pit { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -464,7 +482,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 14px; }
     <div class="sec-head">
       <span class="sec-num">07</span>
       <h2>Check yourself</h2>
-      <p>Eight quick questions. Pick an answer to see why. <span class="score" id="score"></span></p>
+      <p>Nine quick questions. Pick an answer to see why. <span class="score" id="score"></span></p>
     </div>
     <div class="quiz" id="quiz"></div>
   </section>
@@ -504,8 +522,17 @@ print(response.content[0].text)`, see: ['token', 'context'] },
     beg: "Models don't see letters or whole words. They see tokens. Common words are one token, and rare or long words get chopped into pieces. Tokens are also how you pay and how a model's memory is measured.",
     dev: "A tokenizer (usually byte-pair encoding) maps text to integer IDs. English averages about 4 characters per token. Pricing, rate limits, max_tokens and context size are all counted in tokens. Code, numbers and non-English text often use more than you'd guess.", see: ['context', 'latency'] },
   { id: 'context', sec: 'models', term: 'Context window', tag: 'Everything the model can see at once.', viz: 'context',
-    beg: "The model's short-term memory is a bucket with a fixed size. Instructions, the chat so far, files you paste, and its own replies all go in. When the bucket fills up, something has to give: old items fall out, or get squished into a summary.",
-    dev: "The max tokens (input plus output) a model can handle in one request. Each turn resends the whole history, so long sessions get slower and pricier. Harnesses manage it with truncation, compaction, and by keeping details in files the agent can re-read later.", see: ['compaction', 'contexteng'] },
+    beg: "The model's short-term memory is a bucket with a fixed size. Instructions, the chat so far, files you paste, and its own replies all go in. When the bucket fills up, something has to give: old items fall out, or get squished into a summary. And a fuller bucket isn't a better one. Long before it overflows, the model starts paying less attention to what's buried in the middle.",
+    dev: "The max tokens (input plus output) a model can handle in one request. Each turn resends the whole history, so long sessions get slower and pricier. Harnesses manage it with truncation, compaction, and by keeping details in files the agent can re-read later. Quality also drops well before the hard limit, which is often called context rot.", see: ['confusion', 'compaction', 'contexteng'] },
+  { id: 'confusion', sec: 'models', term: 'Context confusion (context rot)', tag: 'Too much in the window makes the model worse, not smarter.', viz: 'confusion',
+    extra: `<div class="cf-types">
+        <div><b>Distraction</b><span>So much history that the model leans on it and repeats old approaches instead of thinking fresh.</span></div>
+        <div><b>Confusion</b><span>Irrelevant material, like 40 tools or unrelated files, gets used just because it's there.</span></div>
+        <div><b>Clash</b><span>Old and new information disagree: "use Python 3.9" early on, "we upgraded to 3.12" later.</span></div>
+        <div><b>Poisoning</b><span>An early mistake or hallucination stays in the context and keeps getting treated as fact.</span></div>
+      </div><p class="cf-src">Failure names popularized by Drew Breunig, "How Long Contexts Fail" (2025).</p>`,
+    beg: "Stuffing more into the bucket doesn't make the model smarter. Past a point it gets worse: it skims, loses track of things buried in the middle, mixes up old and new instructions, and keeps repeating its own earlier mistakes. Imagine being handed a 300-page binder and asked about one sentence on page 150. The fix is usually a fresh start with only what matters.",
+    dev: "Accuracy drops as input length grows, long before the advertised limit (Chroma's 2025 'Context Rot' study found this across the models it tested). Models also recall the start and end of the context better than the middle (Liu et al., 'Lost in the Middle', 2023). Fixes: a fresh session per task, compaction, key instructions at the top with critical ones repeated near the end, only the files and tools the task needs, and subagents to keep side work out of the main context.", see: ['context', 'contexteng', 'subagents'] },
   { id: 'temperature', sec: 'models', term: 'Temperature', tag: 'A dial between predictable and creative.', viz: 'temperature',
     beg: "At every step the model has a list of possible next words, each with odds. Temperature controls how adventurous it is when picking. Turn it low and it almost always takes the favorite. Turn it high and long shots get a real chance.",
     dev: "Logits are divided by T before softmax. T near 0 approaches greedy decoding; T above 1 flattens the distribution. Use low values for extraction and code, higher for brainstorming. Often paired with top_p or top_k sampling.", see: ['structured'] },
@@ -680,8 +707,8 @@ const HABITS = [
     dev: 'Use read-only credentials and a sandbox or container. Keep backups and use git so changes can be rolled back.' },
   { id: 'longchat', title: 'One endless chat for everything', risk: ['context', 'Lost context'],
     dont: 'Running one conversation for days across unrelated tasks.',
-    what: 'The context window fills up. Early instructions get dropped or summarized away, and answers drift.',
-    doit: 'Start a fresh session per task. Put lasting rules in a memory file so every session starts with them.', see: 'context' },
+    what: 'The context window fills up and the model gets confused. Early instructions get buried or summarized away, and answers drift.',
+    doit: 'Start a fresh session per task. Put lasting rules in a memory file so every session starts with them.', see: 'confusion' },
   { id: 'unread', title: 'Shipping code you haven\'t read', risk: ['security', 'Security'],
     dont: 'Pasting AI-written code into production because it ran once without errors.',
     what: 'Subtle bugs, security holes, and made-up library functions that only fail later.',
@@ -740,7 +767,7 @@ $('#habits').innerHTML = HABITS.map(h => `<article class="card pit" id="term-pit
   <div class="see">Related <button data-go="${h.see}">${esc(nameOf(h.see))}</button></div>
 </article>`).join('');
 $('#secnav').innerHTML = SECTIONS.map((s, i) => `<button data-sec="sec-${s.id}"><b>0${i + 1}</b>${s.title}</button>`).join('') + `<button data-sec="sec-habits"><b>06</b>Good &amp; bad habits</button><button data-sec="sec-quiz"><b>07</b>Quiz</button>`;
-$('#counts').innerHTML = `<span><b>${TERMS.length}</b> terms</span><span><b>${HABITS.length}</b> bad habits to avoid</span><span><b>${TERMS.filter(t => t.viz).length + 1}</b> live demos</span><span><b>8</b> quiz questions</span>`;
+$('#counts').innerHTML = `<span><b>${TERMS.length}</b> terms</span><span><b>${HABITS.length}</b> bad habits to avoid</span><span><b>${TERMS.filter(t => t.viz).length + 1}</b> live demos</span><span><b>9</b> quiz questions</span>`;
 
 /* ---------- navigation ---------- */
 function go(id) {
@@ -892,12 +919,13 @@ VIZ.context = box => {
   const reset = () => {
     uid = 0; n = 0; f = 0; fresh = null; squished = null;
     items = [mk('sys', 'System prompt', 3), mk('user', 'Fix the login bug', 2), mk('ai', 'Reading auth.py…', 3), mk('file', 'auth.py (pasted file)', 6), mk('ai', 'Found it: off-by-one in token check', 3)];
-    note('The bucket holds 24k tokens. Add messages until it overflows.');
+    note('The bucket holds 24k tokens. As it fills, items in the middle fade: the model pays them less attention. Add messages until it overflows.');
   };
   box.innerHTML = `<div class="ctx-wrap">
       <div><p class="vlabel">Context window</p><div class="bucket" id="cx-b" aria-label="Context window contents"></div></div>
       <div class="ctx-side">
-        <div><p class="vstats" id="cx-used" style="margin:0"></p><div class="meter"><span id="cx-meter"></span></div></div>
+        <div><p class="vstats" id="cx-used" style="margin:0"></p><div class="meter"><span id="cx-meter"></span></div>
+          <p class="vstats" id="cx-focus-l" style="margin:8px 0 0"></p><div class="meter"><span id="cx-focus"></span></div></div>
         <div class="vbtns" style="margin:0"><button class="btn" id="cx-msg">Add a message</button><button class="btn ghost" id="cx-file">Paste a big file</button></div>
         <fieldset class="radio-row"><legend>When the bucket is full</legend>
           <label><input type="radio" name="cx-mode" value="drop" checked> Drop the oldest</label>
@@ -905,15 +933,20 @@ VIZ.context = box => {
         </fieldset>
         <p class="cx-note" id="cx-note" aria-live="polite"></p>
         <div><button class="btn ghost" id="cx-reset">Reset</button></div>
-        <div class="legend"><span><i style="background:var(--accent-soft);outline:1.5px solid var(--accent)"></i>System</span><span><i style="background:var(--c1)"></i>You</span><span><i style="background:var(--c3)"></i>Model</span><span><i style="background:var(--c5)"></i>File</span><span><i style="background:var(--violet-soft);outline:1.5px dashed var(--violet)"></i>Summary</span></div>
+        <div class="legend"><span><i style="background:var(--accent-soft);outline:1.5px solid var(--accent)"></i>System</span><span><i style="background:var(--c1)"></i>You</span><span><i style="background:var(--c3)"></i>Model</span><span><i style="background:var(--c5)"></i>File</span><span><i style="background:var(--violet-soft);outline:1.5px dashed var(--violet)"></i>Summary</span><span><i style="background:var(--c1);opacity:.4"></i>Faded = less attention</span></div>
       </div></div>`;
   const note = t => { $('#cx-note', box).textContent = t; };
   const used = () => items.reduce((a, b) => a + b.size, 0);
   const render = () => {
-    $('#cx-b', box).innerHTML = items.map(it => `<div class="blk k-${it.kind}${it.id === fresh ? ' in' : ''}${it.id === squished ? ' squish' : ''}" style="height:calc(${it.size / CAP * 100}% - 3px)"><span>${esc(it.label)}</span><em>${it.size}k</em></div>`).join('');
+    const fill = used() / CAP;
+    const faint = i => fill > .6 && i > 0 && i < items.length - 2 && items[i].kind !== 'summary';
+    $('#cx-b', box).innerHTML = items.map((it, i) => `<div class="blk k-${it.kind}${it.id === fresh ? ' in' : ''}${it.id === squished ? ' squish' : ''}${faint(i) ? ' faint' : ''}" style="height:calc(${it.size / CAP * 100}% - 3px)"><span>${esc(it.label)}</span><em>${it.size}k</em></div>`).join('');
     const u = used();
     $('#cx-used', box).textContent = `${u}k of ${CAP}k tokens used`;
     const m = $('#cx-meter', box); m.style.width = (u / CAP * 100) + '%'; m.classList.toggle('hot', u / CAP > .8);
+    const focus = Math.round(fill <= .5 ? 100 : 100 - (fill - .5) * 2 * 55);
+    $('#cx-focus-l', box).textContent = `Model focus: ${focus}%`;
+    const fm = $('#cx-focus', box); fm.style.width = focus + '%'; fm.classList.toggle('hot', focus < 70);
     fresh = squished = null;
   };
   const add = (kind, label, size) => {
@@ -936,7 +969,8 @@ VIZ.context = box => {
       let dropped = 0;
       while (used() + size > CAP) { const i = items.findIndex(it => it.kind !== 'sys'); if (i < 0) break; items.splice(i, 1); dropped++; }
       note(`Bucket full. Dropped the ${dropped} oldest item${dropped > 1 ? 's' : ''}. The model can't see ${dropped > 1 ? 'them' : 'it'} anymore. Notice the system prompt stays pinned.`);
-    } else if (u + size + 4 > CAP) note('Almost full. The next big item will push something out.');
+    } else if (u + size + 4 > CAP) note('Almost full. The next big item will push something out, and the faded middle is already getting less attention.');
+    else if ((u + size) / CAP > .6) note("Not full yet, but focus is already slipping. The faded items in the middle get less attention. That's context rot.");
     const it = mk(kind, label, size); items.push(it); fresh = it.id;
     render();
   };
@@ -944,6 +978,48 @@ VIZ.context = box => {
   $('#cx-file', box).onclick = () => { add('file', FILES[f++ % FILES.length], 7); };
   $('#cx-reset', box).onclick = () => { reset(); render(); };
   reset(); render();
+};
+
+VIZ.confusion = box => {
+  const X0 = 52, X1 = 404, Y0 = 18, Y1 = 178;
+  const sx = t => X0 + t * (X1 - X0), sy = v => Y1 - v / 100 * (Y1 - Y0);
+  const recall = (t, L) => (97 - 12 * L) - (4 + 45 * L * L) * 4 * t * (1 - t);
+  const POS = { start: [0.04, 'the start'], middle: [0.5, 'the middle'], end: [0.96, 'the end'] };
+  let pos = 'middle';
+  box.innerHTML = `<p class="vlabel">Where should the key instruction go?</p>
+    <svg class="cf-chart" viewBox="0 0 420 222" role="img" aria-label="Chance the model follows an instruction, by its position in the context">
+      ${[0, 50, 100].map(v => `<line class="gl" x1="${X0}" x2="${X1}" y1="${sy(v)}" y2="${sy(v)}"/><text class="ax" x="${X0 - 8}" y="${sy(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
+      <path class="area" id="cf-area"/><path class="curve" id="cf-curve"/>
+      <line class="mk-line" id="cf-mkl"/><circle class="mk" id="cf-mk" r="7"/>
+      <text class="mk-label" id="cf-mkt" text-anchor="middle"></text>
+      <text class="ax" x="${X0}" y="198">Start of context</text>
+      <text class="ax" x="${(X0 + X1) / 2}" y="198" text-anchor="middle">Middle</text>
+      <text class="ax" x="${X1}" y="198" text-anchor="end">End (newest)</text>
+      <text class="ax" x="${(X0 + X1) / 2}" y="216" text-anchor="middle">Where the instruction sits in the context</text>
+    </svg>
+    <div class="slider-row" style="margin-top:6px"><label for="cf-fill">How full is the window?</label><input type="range" id="cf-fill" min="10" max="100" step="5" value="70" style="accent-color:var(--accent)"><output id="cf-fill-v" for="cf-fill">70%</output></div>
+    <div class="vbtns"><span class="hint">Put the instruction at:</span><div class="seg" role="group" aria-label="Instruction position">${Object.keys(POS).map(k => `<button data-pos="${k}" aria-pressed="${k === pos}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div></div>
+    <p class="cf-read" id="cf-read" aria-live="polite"></p>
+    <p class="vnote">Illustrative numbers. The U shape follows "Lost in the Middle" (Liu et al., 2023), and the curve sinking as the window fills follows Chroma's "Context Rot" study (2025). Exact numbers vary by model and task.</p>`;
+  const sl = $('#cf-fill', box);
+  const draw = () => {
+    const L = +sl.value / 100;
+    $('#cf-fill-v', box).textContent = sl.value + '%';
+    const pts = Array.from({ length: 41 }, (_, i) => { const t = i / 40; return [sx(t), sy(recall(t, L))]; });
+    const d = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+    $('#cf-curve', box).setAttribute('d', d);
+    $('#cf-area', box).setAttribute('d', d + ` L${X1} ${Y1} L${X0} ${Y1} Z`);
+    const [t, name] = POS[pos], v = recall(t, L), x = sx(t), y = sy(v);
+    const mk = $('#cf-mk', box); mk.setAttribute('cx', x); mk.setAttribute('cy', y);
+    const ml = $('#cf-mkl', box); ml.setAttribute('x1', x); ml.setAttribute('x2', x); ml.setAttribute('y1', y); ml.setAttribute('y2', Y1);
+    const mt = $('#cf-mkt', box); mt.setAttribute('x', Math.min(Math.max(x, X0 + 20), X1 - 20)); mt.setAttribute('y', y - 14); mt.textContent = Math.round(v) + '%';
+    const verdict = v >= 85 ? 'Reliable.' : v >= 65 ? 'Getting shaky.' : 'Often missed.';
+    $('#cf-read', box).innerHTML = `Instruction at ${name}, window ${sl.value}% full: the model follows it about <b>${Math.round(v)}%</b> of the time. ${verdict}`;
+    $$('[data-pos]', box).forEach(b => b.setAttribute('aria-pressed', b.dataset.pos === pos));
+  };
+  $$('[data-pos]', box).forEach(b => b.onclick = () => { pos = b.dataset.pos; draw(); });
+  sl.addEventListener('input', draw);
+  draw();
 };
 
 VIZ.agent = box => {
@@ -1221,6 +1297,7 @@ const QUIZ = [
   ['When a model "uses a tool", who actually runs it?', ['The model itself', 'Your app or harness', 'The vector database', 'The tokenizer'], 1, 'The model only asks. Your code runs the tool and sends back the result.', 'tools'],
   ['Which of these is a harness?', ['Claude Code', 'A token', 'An embedding', 'Temperature'], 0, 'Claude Code wraps the model with a loop, tools, permissions, memory and a UI.', 'harness'],
   ['You need the exact same JSON shape every time from an extraction task. Temperature should be…', ['High, around 1.5', 'Low, near 0', "It doesn't matter", 'Exactly 1'], 1, 'Low temperature keeps the model on its most likely, consistent output.', 'temperature'],
+  ['Your chat with an AI is long but nowhere near the limit, and its answers keep getting worse. What is most likely going on?', ['The model is getting tired', 'Context rot: too much in the window dilutes its attention', 'The temperature went up', 'It ran out of tokens'], 1, 'Quality drops as context grows, well before the limit. Start a fresh session with just what matters.', 'confusion'],
   ['What does MCP standardize?', ['How models are trained', 'How text is split into tokens', 'How AI apps connect to tools and data', 'How prompts are cached'], 2, 'One protocol so any MCP app can plug into any MCP server.', 'mcp'],
   ['An AI answer includes a link to an official-looking source. What should you do?', ['Trust it, since it has a real domain', 'Open it and check it says what the AI claims', 'Ask the AI if the link is real', 'Remove the link and keep the claim'], 1, 'Invented links often use real domains. Asking the AI again can produce a confident "yes, it\'s real".', 'pit-cite'],
   ['You need the total of a 3,000-row column. Best way to use AI?', ['Paste the rows and ask for the total', 'Ask it to estimate', 'Ask it to write a formula or script, then run it', 'Ask twice and average the answers'], 2, 'Models predict digits; they don\'t calculate. Let code do the math.', 'pit-math'],

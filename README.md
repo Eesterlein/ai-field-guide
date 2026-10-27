@@ -13,20 +13,21 @@ Every term has two explanations, and a toggle at the top switches between them:
 
 | Section | Terms |
 |---|---|
-| 01 How models work | LLM, token, context window, temperature, embedding, hallucination |
+| 01 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
 | 02 Talking to models | prompt, system prompt, few-shot prompting, reasoning, structured output |
 | 03 Giving models abilities | tool use, MCP, RAG, vector database |
 | 04 Agents | agent, harness, subagents, agentic AI, skills, memory, compaction, context engineering |
 | 05 Shipping it | prompt caching, fine-tuning vs prompting, evals, guardrails, latency & cost |
 | 06 Good habits, bad habits | 9 common mistakes, what goes wrong, and what to do instead |
-| 07 Check yourself | an 8-question quiz |
+| 07 Check yourself | a 9-question quiz |
 
 ## Live demos
 
 - **Tokens**: type a sentence and watch it split into tokens
 - **Temperature**: a slider that reshapes the odds for the model's next word
 - **Embeddings**: a meaning map; click a word to see its nearest neighbors
-- **Context window**: a bucket that overflows, then drops or compacts old messages
+- **Context window**: a bucket that overflows, then drops or compacts old messages, with a focus meter that drops as it fills
+- **Context confusion**: a lost-in-the-middle curve showing how often the model follows an instruction depending on where it sits and how full the window is
 - **Agent loop**: an agent thinks, acts and observes its way to fixing a failing test
 - **Harness**: remove the harness and see what the bare model can still do
 - **Tool use**: a step-by-step diagram of a weather lookup for Gunnison, CO
@@ -55,4 +56,4 @@ Plain HTML, CSS and JavaScript, with inline SVG for the diagrams. No frameworks.
 
 ## A note on accuracy
 
-The demos are simplified pictures of how these systems behave, not real model internals. The tokenizer is an approximation, and the timings and similarity scores are illustrative.
+The demos are simplified pictures of how these systems behave, not real model internals. The tokenizer is an approximation, and the timings, similarity scores and context-confusion curve are illustrative. The curve's shape follows *Lost in the Middle* (Liu et al., 2023) and Chroma's *Context Rot* study (2025).
