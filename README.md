@@ -4,6 +4,8 @@
 
 An interactive guide to the AI words programmers keep hearing (*agent*, *harness*, *context window*, *MCP*, *RAG* and more), explained with demos you can play with instead of walls of text.
 
+Many cards also have **Why it matters**, **Where it came from** and **How humans do it** notes that connect each idea to how people think.
+
 Every term has two explanations, and a toggle at the top switches between them:
 
 - **Plain English**: an everyday analogy, written for anyone.
@@ -16,7 +18,7 @@ The guide is split into tabs that build on each other. Work through them in orde
 | Tab | What's in it |
 |---|---|
 | Start here | A clickable map of how the pieces fit together, and a suggested path |
-| 01 History & math | A timeline from Turing (1950) to agents (2025), words as vectors, attention, the five formulas behind it all, and why nobody fully understands what's inside a model |
+| 01 History & math | A timeline from Turing (1950) to agents (2025), the Turing test, words as vectors, attention, the five formulas behind it all, and why nobody fully understands what's inside a model |
 | 02 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
 | 03 Prompting | prompt engineering, system prompt, few-shot prompting, reasoning, structured output |
 | 04 Tools & skills | tools vs skills vs the agent loop, tool use, MCP, RAG, vector database, skills |
@@ -29,12 +31,13 @@ The guide is split into tabs that build on each other. Work through them in orde
 
 - **Prompt playground**: type any prompt (typos welcome) and a toy model scores it on goal, context, audience, format, constraints and examples, then answers with something silly that gets better as your prompt does
 - **Tool, skill, or neither?**: a 9-question guessing game
+- **Human or machine?**: a Turing test game, starting with two exchanges from Turing's 1950 paper
 - **Words as vectors**: king − man + woman, step by step
 - **Attention**: change one word and watch what "it" refers to
 - **A model's weights**: a peek at the numbers inside a model, and what a "feature" is
 - **Tokens**: type a sentence and watch it split into tokens
-- **Temperature**: a slider that reshapes the odds for the model's next word
-- **Embeddings**: a meaning map; click a word to see its nearest neighbors
+- **Temperature**: a slider that reshapes the odds for the model's next word, with a live table of the softmax math
+- **Embeddings**: a meaning map; click a word to see its nearest neighbors and the cosine-similarity math behind them
 - **Context window**: a bucket that overflows, then drops or compacts old messages, with a focus meter that drops as it fills
 - **Context confusion**: a lost-in-the-middle curve showing how often the model follows an instruction depending on where it sits and how full the window is
 - **Agent loop**: an agent thinks, acts and observes its way to fixing a failing test

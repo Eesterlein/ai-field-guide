@@ -42,21 +42,31 @@ VIZ.temperature = box => {
     <div class="slider-row"><label for="t-slider">Temperature</label><input type="range" id="t-slider" min="0" max="2" step="0.05" value="0.7"><output id="t-val" for="t-slider">0.70</output></div>
     <div class="temp-scale"><span>0 = always the favorite</span><span>2 = wild</span></div>
     <div class="bars">${W.map(([w]) => `<div class="prob-row"><span class="bw">${w}</span><span class="track"><span class="fill"></span></span><span class="bp"></span></div>`).join('')}</div>
-    <div class="vbtns"><button class="btn" id="t-sample">Pick 10 next words</button><div class="samples" id="t-samples" aria-live="polite"></div></div>`;
+    <div class="vbtns"><button class="btn" id="t-sample">Pick 10 next words</button><div class="samples" id="t-samples" aria-live="polite"></div></div>
+    <div class="mathbox"><p class="vlabel">The math, live</p>
+      <p class="mb-steps"><span><b>1</b> the model gives every word a score <i>z</i></span><span><b>2</b> divide by temperature: <i>z</i> ÷ T</span><span><b>3</b> raise <i>e</i> to that power, so everything is positive</span><span><b>4</b> divide by the total, so the odds add up to 100%</span></p>
+      <div class="scroll-x"><table class="mtable"><thead><tr><th>word</th><th>score <i>z</i></th><th><i>z</i> ÷ T</th><th><i>e</i><sup><i>z</i>÷T</sup></th><th>÷ total = odds</th></tr></thead><tbody id="t-math"></tbody><tfoot><tr><td colspan="3">total</td><td id="t-sum"></td><td>100%</td></tr></tfoot></table></div>
+      <p class="vnote" id="t-mnote"></p></div>`;
   const sl = $('#t-slider', box);
-  const probs = T => {
-    if (T < 0.05) return W.map((_, i) => i === 0 ? 1 : 0);
-    const m = Math.max(...W.map(w => w[1] / T));
-    const e = W.map(w => Math.exp(w[1] / T - m)); const s = e.reduce((a, b) => a + b, 0);
-    return e.map(x => x / s);
+  const fmt = x => x >= 1000 ? Math.round(x).toLocaleString() : x >= 10 ? x.toFixed(1) : x.toFixed(2);
+  const calc = T => {
+    if (T < 0.05) return { p: W.map((_, i) => i === 0 ? 1 : 0), e: null };
+    const e = W.map(w => Math.exp(w[1] / T)), s = e.reduce((a, b) => a + b, 0);
+    return { p: e.map(x => x / s), e, s };
   };
   const update = () => {
-    const T = +sl.value, p = probs(T);
+    const T = +sl.value, { p, e, s } = calc(T);
     $('#t-val', box).textContent = T.toFixed(2);
     $$('.prob-row', box).forEach((r, i) => { $('.fill', r).style.width = (p[i] * 100) + '%'; $('.bp', r).textContent = (p[i] * 100).toFixed(p[i] < .01 && p[i] > 0 ? 1 : 0) + '%'; });
+    $('#t-math', box).innerHTML = W.map(([w, z], i) => `<tr><td>${w}</td><td>${z.toFixed(1)}</td><td>${e ? (z / T).toFixed(2) : '–'}</td><td>${e ? fmt(e[i]) : '–'}</td><td><b>${(p[i] * 100).toFixed(1)}%</b></td></tr>`).join('');
+    $('#t-sum', box).textContent = e ? fmt(s) : '–';
+    $('#t-mnote', box).textContent = !e ? 'At temperature 0 the model skips the math and just takes the top score (called greedy decoding).'
+      : T < 0.7 ? `Dividing by a small T stretches the gaps between scores, and e to the power of a big number grows fast. So "mat" runs away with it.`
+      : T > 1.2 ? 'Dividing by a big T squashes the scores together, so the odds even out and long shots like "moon" get a real chance.'
+      : 'Near T = 1 the scores pass through almost unchanged.';
   };
   $('#t-sample', box).onclick = () => {
-    const p = probs(+sl.value);
+    const { p } = calc(+sl.value);
     const picks = Array.from({ length: 10 }, () => { let r = Math.random(), i = 0; while (i < p.length - 1 && (r -= p[i]) > 0) i++; return W[i][0]; });
     $('#t-samples', box).innerHTML = picks.map(w => `<span>${w}</span>`).join('');
     const b = $('#t-blank', box); b.textContent = picks[0]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
@@ -67,12 +77,15 @@ VIZ.temperature = box => {
 
 VIZ.embedding = box => {
   const CATS = [['Animals', 'var(--accent)'], ['Food', 'var(--model)'], ['Code', 'var(--ok)'], ['Vehicles', 'var(--violet)']];
+  const DIMS = ['alive', 'food', 'code', 'vehicle', 'cute'];
   const P = [
-    ['cat', 72, 62, 0], ['kitten', 96, 48, 0], ['dog', 112, 88, 0], ['puppy', 140, 72, 0], ['horse', 150, 118, 0],
-    ['apple', 300, 52, 1], ['banana', 340, 76, 1], ['pizza', 286, 104, 1], ['pasta', 326, 124, 1],
-    ['python', 112, 166, 2], ['bug', 160, 152, 2], ['function', 62, 226, 2], ['javascript', 112, 246, 2], ['variable', 70, 196, 2],
-    ['car', 296, 204, 3], ['truck', 336, 232, 3], ['bike', 262, 238, 3], ['bus', 352, 190, 3],
+    ['cat', 72, 62, 0, [0.9, 0, 0, 0, 0.7]], ['kitten', 96, 48, 0, [0.9, 0, 0, 0, 1.0]], ['dog', 112, 88, 0, [0.9, 0, 0, 0, 0.6]], ['puppy', 140, 72, 0, [0.9, 0, 0, 0, 0.95]], ['horse', 150, 118, 0, [0.9, 0, 0, 0.3, 0.3]],
+    ['apple', 300, 52, 1, [0, 0.9, 0.1, 0, 0.2]], ['banana', 340, 76, 1, [0, 0.9, 0, 0, 0.3]], ['pizza', 286, 104, 1, [0, 1, 0, 0, 0.1]], ['pasta', 326, 124, 1, [0, 1, 0, 0.05, 0]],
+    ['python', 112, 166, 2, [0.5, 0, 0.85, 0, 0]], ['bug', 160, 152, 2, [0.4, 0, 0.7, 0, 0.1]], ['function', 62, 226, 2, [0, 0, 1, 0, 0]], ['javascript', 112, 246, 2, [0, 0, 1, 0.05, 0.05]], ['variable', 70, 196, 2, [0, 0, 0.95, 0, 0.02]],
+    ['car', 296, 204, 3, [0, 0, 0, 1, 0]], ['truck', 336, 232, 3, [0, 0, 0.05, 1, 0]], ['bike', 262, 238, 3, [0.1, 0, 0, 0.9, 0.2]], ['bus', 352, 190, 3, [0.05, 0, 0, 1, 0.05]],
   ];
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0), len = a => Math.sqrt(dot(a, a)), cos = (a, b) => dot(a, b) / (len(a) * len(b));
+  const f = x => x.toFixed(2);
   box.innerHTML = `<p class="vlabel">Click a word to find its nearest neighbors</p>
     <svg class="emb" viewBox="0 0 420 280" role="group" aria-label="Words placed by meaning">
       <g class="grid">${[70, 140, 210].map(y => `<line x1="0" x2="420" y1="${y}" y2="${y}"/>`).join('')}${[105, 210, 315].map(x => `<line y1="0" y2="280" x1="${x}" x2="${x}"/>`).join('')}</g>
@@ -81,13 +94,25 @@ VIZ.embedding = box => {
     </svg>
     <div class="legend">${CATS.map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>
     <p class="vstats" id="e-info" aria-live="polite"></p>
+    <div class="mathbox"><p class="vlabel">The math: every word is a list of numbers</p>
+      <p class="vnote" style="margin:0 0 8px">Here each word gets 5 made-up numbers, one per idea. Real models use hundreds or thousands, and nobody labels them.</p>
+      <div class="scroll-x"><table class="mtable" id="e-vecs"></table></div>
+      <div class="cos" id="e-cos"></div></div>
     <p class="vnote">Notice that "python" and "bug" sit between animals and code. Words with two meanings land between their meanings.</p>`;
   const sel = w => {
     const a = P.find(p => p[0] === w);
-    const near = P.filter(p => p !== a).map(p => [p, Math.hypot(p[1] - a[1], p[2] - a[2])]).sort((x, y) => x[1] - y[1]).slice(0, 3);
+    const ranked = P.filter(p => p !== a).map(p => [p, cos(a[4], p[4])]).sort((x, y) => y[1] - x[1]);
+    const near = ranked.slice(0, 3), far = ranked[ranked.length - 1], b = near[0][0];
     $('#e-lines', box).innerHTML = near.map(([p]) => `<line class="nl" x1="${a[1]}" y1="${a[2]}" x2="${p[1]}" y2="${p[2]}"/>`).join('');
     $$('.pt', box).forEach(g => { g.classList.toggle('sel', g.dataset.w === w); g.classList.toggle('near', near.some(([p]) => p[0] === g.dataset.w)); });
-    $('#e-info', box).textContent = `Closest to "${w}": ` + near.map(([p, d]) => `${p[0]} (${(1 - d / 450).toFixed(2)})`).join(', ');
+    $('#e-info', box).textContent = `Closest to "${w}": ` + near.map(([p, s]) => `${p[0]} (${f(s)})`).join(', ') + ` · farthest: ${far[0][0]} (${f(far[1])})`;
+    $('#e-vecs', box).innerHTML = `<thead><tr><th></th>${DIMS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>${[a, b, far[0]].map(p => `<tr><td><b>${p[0]}</b></td>${p[4].map(x => `<td style="background:color-mix(in srgb, var(--accent) ${Math.round(x * 45)}%, transparent)">${f(x)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    const terms = a[4].map((x, i) => `${f(x)}×${f(b[4][i])}`).join(' + ');
+    $('#e-cos', box).innerHTML = `<p><b>Cosine similarity</b> = (a · b) ÷ (|a| × |b|), where a · b means multiply matching numbers and add them up.</p>
+      <p class="mono">${w} · ${b[0]} = ${terms} = <b>${f(dot(a[4], b[4]))}</b></p>
+      <p class="mono">|${w}| = ${f(len(a[4]))}, |${b[0]}| = ${f(len(b[4]))}</p>
+      <p class="mono">similarity = ${f(dot(a[4], b[4]))} ÷ (${f(len(a[4]))} × ${f(len(b[4]))}) = <b class="hi">${f(near[0][1])}</b></p>
+      <p>1.00 means pointing the same way (same meaning). 0 means nothing in common: "${w}" vs "${far[0][0]}" scores ${f(far[1])}.</p>`;
   };
   $$('.pt', box).forEach(g => {
     g.addEventListener('click', () => sel(g.dataset.w));
@@ -691,4 +716,41 @@ VIZ.mystery = box => {
     note.innerHTML = `Researchers found that patterns spread across many numbers act together as one “feature”, like a <b>Golden Gate Bridge</b> feature. Turn it up, and the model can’t stop talking about the bridge.`;
   };
   $('#mx-clear', box).onclick = () => { cells.forEach(c => c.classList.remove('feat')); note.textContent = `These ${N} numbers are about 0.0000001% of a large model. None of them means anything on its own.`; };
+};
+
+VIZ.turing = box => {
+  const R = [
+    ['Add 34957 to 70764.', '(pauses about 30 seconds) 105621', 'machine', 'From Turing’s own 1950 paper, where it’s the machine’s answer. Notice it’s wrong (the real sum is 105,721) and slow, the way a person might be.'],
+    ['Please write me a sonnet on the subject of the Forth Bridge.', 'Count me out on this one. I never could write poetry.', 'machine', 'Also the machine, in Turing’s paper. He imagined a good imitator would dodge tasks a typical person couldn’t do.'],
+    ['How was your weekend?', 'Great question! Weekends are a wonderful time to recharge. Here are three highlights: 1) a relaxing walk, 2) a good book, 3) quality time with friends.', 'machine', 'A classic chatbot tell: cheerful, tidy, a numbered list, and nothing specific.'],
+    ['How was your weekend?', 'ugh drove to crested butte, forgot my snow boots, spent all of saturday in a coffee shop. 10/10 would do again', 'human', 'Specific, a little messy, and a bit self-deprecating. This is what people tend to look for.'],
+    ['How was your weekend?', 'lol not much honestly. watched a movie, fell asleep halfway thru. u?', 'machine', 'The trick one. An AI told to “act like a casual texter” can sound exactly like this. In a 2025 study, GPT-4.5 playing a persona was picked as the human 73% of the time.'],
+  ];
+  let i = 0, score = 0;
+  const show = () => {
+    if (i >= R.length) {
+      box.innerHTML = `<div class="sg-card done"><p class="sg-k">You got</p><p class="sg-item">${score} of ${R.length}</p>
+        <p>${score === R.length ? 'Sharp eye. Most people miss the last one.' : 'The tells that used to work (lists, cheerfulness, no typos) are easy for a modern AI to avoid when asked.'}</p>
+        <div class="vbtns"><button class="btn" id="tt-again">Play again</button></div></div>`;
+      $('#tt-again', box).onclick = () => { i = 0; score = 0; show(); };
+      return;
+    }
+    const [q, a] = R[i];
+    box.innerHTML = `<p class="vlabel">Human or machine? <span class="sg-n">${i + 1} of ${R.length} · score ${score}</span></p>
+      <div class="sg-card">
+        <div class="chat"><p class="judge"><span>Judge</span>${esc(q)}</p><p class="hidden-p"><span>Player ?</span>${esc(a)}</p></div>
+        <div class="sg-btns two"><button class="btn ghost" data-a="human">Human</button><button class="btn ghost" data-a="machine">Machine</button></div>
+        <p class="sg-why" id="tt-why" aria-live="polite"></p>
+      </div>
+      <p class="vnote">Rounds 1 and 2 are quoted from Turing’s paper. We wrote rounds 3 to 5 to show the clues people look for.</p>`;
+    $$('[data-a]', box).forEach(b => b.onclick = () => {
+      const ok = b.dataset.a === R[i][2]; if (ok) score++;
+      $$('[data-a]', box).forEach(x => { x.disabled = true; if (x.dataset.a === R[i][2]) x.classList.add('right'); });
+      if (!ok) b.classList.add('wrong');
+      $('#tt-why', box).innerHTML = `<b>${R[i][2] === 'human' ? 'Human.' : 'Machine.'}</b> ${esc(R[i][3])} <button class="btn" id="tt-next">${i === R.length - 1 ? 'See score' : 'Next'}</button>`;
+      $('#tt-next', box).onclick = () => { i++; show(); };
+      $('#tt-next', box).focus();
+    });
+  };
+  show();
 };

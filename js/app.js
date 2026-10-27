@@ -19,9 +19,10 @@ function cardHTML(t) {
       <div class="dev"><p class="mode-label">For developers</p><p>${esc(t.dev)}</p>${t.code ? `<pre><code>${esc(t.code)}</code></pre>` : ''}</div>
       ${t.why ? `<div class="why-box"><p class="mode-label">Why it matters</p><p>${esc(t.why)}</p></div>` : ''}
       ${t.origin ? `<div class="origin"><p class="mode-label">Where it came from</p><p>${esc(t.origin)}</p></div>` : ''}
+      ${t.human ? `<div class="human"><p class="mode-label">How humans do it</p><p>${esc(t.human)}</p></div>` : ''}
       ${see}
     </div>`;
-  const search = [t.term, t.tag, t.beg, t.dev, t.why, t.origin, (t.extra || '').replace(/<[^>]+>/g, ' ')].join(' ').toLowerCase();
+  const search = [t.term, t.tag, t.beg, t.dev, t.why, t.origin, t.human, (t.extra || '').replace(/<[^>]+>/g, ' ')].join(' ').toLowerCase();
   if (t.viz) return `<article class="card feature" id="term-${t.id}" data-search="${esc(search)}">${text}<div class="viz" data-viz="${t.viz}"></div></article>`;
   return `<article class="card mini" id="term-${t.id}" data-search="${esc(search)}">${text}</article>`;
 }
@@ -71,7 +72,7 @@ const habitsHTML = () => HABITS.map(h => `<article class="card pit" id="term-pit
 </article>`).join('');
 
 const BODY = {
-  history: () => timelineHTML() + `<div class="features">${['vecmath', 'attention'].map(id => cardHTML(byId[id])).join('')}</div>` + mathHTML() + `<div class="features">${cardHTML(byId.mystery)}</div>`,
+  history: () => timelineHTML() + `<div class="features">${['turing', 'vecmath', 'attention'].map(id => cardHTML(byId[id])).join('')}</div>` + mathHTML() + `<div class="features">${cardHTML(byId.mystery)}</div>`,
   habits: () => `<div class="features">${spotHTML}</div><div class="pit-grid">${habitsHTML()}</div>`,
   quiz: () => `<p class="score" id="score"></p><div class="quiz" id="quiz"></div>`,
 };
@@ -186,3 +187,4 @@ $$('.q').forEach(c => {
 
 /* ---------- start ---------- */
 showTab((location.hash || '').slice(1) || 'start', { scroll: false });
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1) || 'start'; if (id !== current) showTab(id); });
