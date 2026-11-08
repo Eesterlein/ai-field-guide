@@ -1,6 +1,7 @@
 /* ---------- tabs ---------- */
 const TABS = [
   { id: 'start', title: 'Start here' },
+  { id: 'quickstart', title: 'Quick start', blurb: 'You opened a chat with an AI. Now what? Seven moves, in order, that work with any tool: ask, give it context, plan, review the plan, implement, stay in the loop, and write it down for next time.' },
   { id: 'history', title: 'History & math', blurb: 'How we got from “can machines think?” to chatbots, and the handful of ideas that made it work.' },
   ...SECTIONS,
   { id: 'habits', title: 'Good & bad habits', blurb: 'AI is most dangerous when it sounds sure of itself. These are the common ways people get burned, and what to do instead.' },
@@ -12,6 +13,7 @@ const tabIndex = id => TABS.findIndex(t => t.id === id);
 function cardHTML(t) {
   const see = t.see ? `<div class="see">See also ${t.see.map(id => `<button data-go="${id}">${esc(nameOf(id))}</button>`).join('')}</div>` : '';
   const text = `<div class="ctext">
+      ${t.step ? `<span class="step-badge">Step ${t.step}</span>` : ''}
       <h3>${esc(t.term)}</h3>
       <p class="tagline">${esc(t.tag)}</p>
       ${t.extra || ''}
@@ -71,7 +73,40 @@ const habitsHTML = () => HABITS.map(h => `<article class="card pit" id="term-pit
   <div class="see">Related <button data-go="${h.see}">${esc(nameOf(h.see))}</button></div>
 </article>`).join('');
 
+const QS_STRIP = [['qs-ask', 'Ask', 'Start with what you’re curious about'], ['qs-context', 'Context', 'Hand it over, let it dig'], ['qs-plan', 'Plan', 'A brief with rules and a stop point'], ['qs-review', 'Review', 'Push back until it’s right'], ['qs-implement', 'Implement', 'Proceed, test, stop on time'], ['qs-loop', 'Iterate', 'Human in the loop'], ['qs-record', 'Record', 'Specs and decisions in the repo']];
+const BRIEF_TEMPLATE = `I'm trying to: [the goal, in your own words]
+Why: [what it's for, who will use it]
+
+Context: [files, folders, docs, error messages, what you've tried]
+Before planning, read the relevant code and docs, research anything
+you're unsure about, and ask me questions. Don't change anything yet.
+
+Rules:
+- Read-only queries only. Do not alter the database.
+- Make no changes to [AWS / production / my accounts].
+- Nothing destructive: no deleting, no force-pushing.
+- No new dependencies without asking.
+
+Give me a plan first, then stop and wait for my review.
+When I approve: [use Chrome to test it / run the tests]
+and show me the evidence.
+Stop point: [show me the diff before you commit].
+Last step: write [the spec / an ADR for any decision] into docs/.`;
+const briefHTML = () => `<article class="card mini brief-card" id="term-qs-brief" data-search="${esc(('starter brief template copy prompt ' + BRIEF_TEMPLATE).toLowerCase())}">
+  <div class="ctext">
+    <span class="step-badge">Copy this</span>
+    <h3>Starter brief</h3>
+    <p class="tagline">All seven steps in one message. Fill in the brackets, delete what doesn’t apply.</p>
+    <pre><code id="brief-text">${esc(BRIEF_TEMPLATE)}</code></pre>
+    <div class="vbtns"><button class="btn" id="brief-copy">Copy brief</button><span class="hint" id="brief-msg" aria-live="polite"></span></div>
+  </div>
+</article>`;
+const quickstartHTML = () => `<div class="qs-strip" aria-label="The seven steps">${QS_STRIP.map(([id, n, d], i) => `<button data-go="${id}"><b>${String(i + 1).padStart(2, '0')}</b><span>${n}</span><small>${d}</small></button>`).join('')}</div>
+  <div class="callout qs-why"><b>The one idea behind all seven</b>The model only knows what is in its context window right now. Everything below is about controlling what goes in, in what order, and where you get to say stop.</div>
+  <div class="features qs-steps">${termsIn('quickstart').sort((a, b) => a.step - b.step).map(cardHTML).join('')}${briefHTML()}</div>`;
+
 const BODY = {
+  quickstart: quickstartHTML,
   history: () => timelineHTML() + `<div class="features">${['turing', 'vecmath', 'attention'].map(id => cardHTML(byId[id])).join('')}</div>` + mathHTML() + `<div class="features">${cardHTML(byId.mystery)}</div>`,
   habits: () => `<div class="features">${spotHTML}</div><div class="pit-grid">${habitsHTML()}</div>`,
   quiz: () => `<p class="score" id="score"></p><div class="quiz" id="quiz"></div>`,
@@ -88,11 +123,11 @@ const panelHTML = (t, i) => {
 $('#panels').insertAdjacentHTML('beforeend', TABS.slice(1).map((t, i) => panelHTML(t, i + 1)).join(''));
 $('#p-start').insertAdjacentHTML('beforeend', `<div class="wrap"><h2 class="path-h">Your path through the guide</h2>
   <div class="path">${TABS.slice(1).map((t, i) => `<button class="path-card" data-tab="${t.id}"><span class="sec-num">${String(i + 1).padStart(2, '0')}</span><b>${t.title}</b><span>${t.blurb}</span></button>`).join('')}</div>
-  <div class="next-row"><button class="btn next-btn" data-tab="history">Start: History &amp; math →</button></div></div>`);
+  <div class="next-row"><button class="btn next-btn" data-tab="${TABS[1].id}">Start: ${TABS[1].title} →</button></div></div>`);
 
 $('#tabs').innerHTML = TABS.map((t, i) => `<button role="tab" id="tab-${t.id}" aria-controls="p-${t.id}" aria-selected="false" tabindex="-1" data-tab="${t.id}">${i ? `<b>${String(i).padStart(2, '0')}</b>` : ''}${t.title}</button>`).join('');
 const demoCount = TERMS.filter(t => t.viz).length + 1;
-$('#counts').innerHTML = `<span><b>${TERMS.filter(t => t.sec !== 'history').length}</b> terms</span><span><b>${demoCount}</b> live demos</span><span><b>${HABITS.length}</b> bad habits to avoid</span><span><b>${QUIZ.length}</b> quiz questions</span>`;
+$('#counts').innerHTML = `<span><b>${TERMS.filter(t => t.sec !== 'history' && t.sec !== 'quickstart').length}</b> terms</span><span><b>${termsIn('quickstart').length}</b>-step quick start</span><span><b>${demoCount}</b> live demos</span><span><b>${HABITS.length}</b> bad habits to avoid</span><span><b>${QUIZ.length}</b> quiz questions</span>`;
 
 /* ---------- tab switching ---------- */
 let current = 'start';
@@ -168,6 +203,14 @@ $('#q').addEventListener('input', e => filter(e.target.value));
 
 /* ---------- demos ---------- */
 $$('[data-viz]').forEach(b => VIZ[b.dataset.viz](b));
+
+/* ---------- starter brief copy ---------- */
+$('#brief-copy').onclick = async () => {
+  const msg = $('#brief-msg');
+  try { await navigator.clipboard.writeText(BRIEF_TEMPLATE); msg.textContent = 'Copied. Paste it into your chat.'; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents($('#brief-text')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); msg.textContent = 'Selected. Press Ctrl+C or ⌘C to copy.'; }
+  setTimeout(() => { msg.textContent = ''; }, 4000);
+};
 
 /* ---------- quiz ---------- */
 let right = 0, answered = 0;

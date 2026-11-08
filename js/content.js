@@ -13,6 +13,145 @@ const SECTIONS = [
 ];
 
 const TERMS = [
+  // 00. Quick start: the workflow for a session with an AI, in order
+  { id: 'qs-ask', sec: 'quickstart', step: 1, term: 'Start with what you’re curious about', tag: 'Lead with the real question, not the step you think comes next.',
+    human: `Reference librarians are trained to run a “reference interview”: before fetching anything, they ask what you’re actually trying to do. The book you asked for is often not the book you need.`,
+    beg: `Open with the question you actually have, in your own words, even if it’s half-formed: “I’m curious why this page loads slowly on phones,” or “I want staff to be able to export this table.” Say the goal, not just the step you’ve decided on. If you ask “how do I convert this file to CSV?” when what you want is a report your boss can open, you’ll get a perfect answer to the wrong question. Questions are also the safest way to start: nothing changes while the AI is explaining.`,
+    dev: `Avoid the XY problem: asking about your attempted solution (Y) instead of the underlying problem (X). State the outcome and why it matters. In a new codebase, start with questions (“how does auth work here?”, “where is the export logic?”), since read-only Q&A is useful on its own and builds the context the later steps need.`,
+    code: `I'm curious why the reports page takes 6+ seconds to load on phones.
+Staff use it at the counter on tablets, so that's the case I care about.
+Don't change anything yet. Just explain what you think is going on.`, see: ['prompt', 'pit-vague', 'pit-afraid'] },
+  { id: 'qs-context', sec: 'quickstart', step: 2, term: 'Give it context, then let it gather the rest', tag: 'Hand over what you have, and tell it to go find what it needs.',
+    extra: `<div class="cf-types">
+        <div><b>What you hand over</b><span>Files, the folder, the error message, a screenshot, the doc you’re working from, what you’ve already tried.</span></div>
+        <div><b>What you tell it to gather</b><span>“Read the relevant code. Check the docs. Research anything you’re unsure about. Ask me questions before you start.”</span></div>
+      </div>`,
+    human: `It’s onboarding. A contractor who shows up without the drawings has to guess where the walls go. The good ones also walk the site and ask questions before quoting the job.`,
+    beg: `The AI can’t see your screen, your files or your head. Give it the raw material first. If you’re using a coding agent, open it inside the project folder so it can read the files itself, and connect the data it needs. Then go one step further: tell it to gather its own context. Ask it to read the code, look things up, and come back with questions. Agents tend to charge ahead on assumptions, and one sentence (“ask me anything you need to know first”) turns guessing into a conversation.`,
+    dev: `Start the agent at the repo root. Point it at the paths, logs and failing tests that matter, and connect data through MCP servers or read-only credentials. Explicitly license discovery: reading code, searching docs and the web, and asking clarifying questions. Answer its questions in one batch. If it asks nothing on a non-trivial task, ask what it assumed. Facts that are true in every session (stack, commands, conventions, no-go zones) belong in a short CLAUDE.md or AGENTS.md.`,
+    code: `Context: plain HTML/JS site, no build step. The table is built in
+js/reports.js from GET /api/reports. See docs/reports.md.
+I already tried caching the API response. No change.
+
+Before proposing anything: read the relevant code, check the network
+calls, research what's normal for a page like this, and ask me
+anything you need to know.`, see: ['context', 'contexteng', 'memory', 'pit-nodata'] },
+  { id: 'qs-plan', sec: 'quickstart', step: 3, term: 'Plan before anything changes', tag: 'Write a brief, then ask for a plan, not the work.',
+    extra: `<div class="ingredients">
+        <div><b>Task</b><span>What “done” looks like</span></div>
+        <div><b>Context</b><span>Point at the docs, files and data</span></div>
+        <div><b>Constraints</b><span>What it must not touch or do</span></div>
+        <div><b>Stop point</b><span>Where it pauses and hands back to you</span></div>
+      </div>
+      <div class="callout"><b>Say the rules out loud</b>A rule that lives only in your head doesn’t exist to the model. Spell out every boundary:
+        <ul class="rules">
+          <li>Use read-only queries only (SELECT). Do not insert, update, delete or alter the database schema.</li>
+          <li>Make no changes to my AWS account. Describe and list resources only.</li>
+          <li>Nothing destructive: no deleting files, no dropping tables, no force-pushing.</li>
+          <li>Don’t touch production. Work on a branch or a copy.</li>
+          <li>No new dependencies, no sent emails or messages, and no spending money without asking me first.</li>
+        </ul></div>
+      <p class="mini-h">Which words actually do something?</p>
+      <div class="kw" role="table" aria-label="Kinds of keywords">
+        <div role="row"><b role="cell">Commands</b><code role="cell">/plan  /loop  /clear  /rewind</code><em role="cell">The app intercepts these before the model sees them. Exact spelling, at the start of the message.</em></div>
+        <div role="row"><b role="cell">Triggers</b><code role="cell">use Chrome · ultrathink</code><em role="cell">Phrases that match a tool, skill or setting. “Use Chrome” loads the browser tools; “ultrathink” asks for deeper reasoning on that one message.</em></div>
+        <div role="row"><b role="cell">Plain words</b><code role="cell">plan · proceed · stop</code><em role="cell">Not switches. The model has seen these words used millions of times, so it reads them as clear, unambiguous instructions.</em></div>
+      </div>`,
+    beg: `Anything bigger than a one-line fix gets a plan first. Write a short brief with four parts: the task, the context, the constraints (the rules above), and the stop point. Then ask for a plan instead of the work: “review the code, research as needed, ask me questions, then give me a plan. Don’t change anything.” Nothing has changed yet, so nothing can break yet. The word “plan” works because the model understands it the way a colleague would, and some apps go further and give it a dedicated planning mode.`,
+    dev: `In Claude Code, type /plan with the task, or press Shift+Tab until the status bar shows plan mode. The agent reads files and proposes a plan but makes no edits until you approve. Back every written rule with a real control, because a prompt is a request and a permission is a rule: a database role with SELECT-only grants, read-only IAM credentials, a git branch, a sandbox. Anthropic’s docs note that phrases like “think step by step” are ordinary prompt text, not keywords. Effort settings and “ultrathink” control reasoning depth.`,
+    code: `/plan Add a "Download CSV" button to the reports page.
+Context: plain HTML/JS, no build step. Table built in js/reports.js
+from GET /api/reports. See docs/reports.md.
+Rules: read-only queries only. Do not alter the database. Don't touch
+the API. Nothing destructive. No new dependencies.
+Review the code, research as needed, ask me questions, then give me
+a plan. Stop before changing any files.`, see: ['prompt', 'guardrails', 'pit-perms'] },
+  { id: 'qs-review', sec: 'quickstart', step: 4, term: 'Read the plan. Actually read it.', tag: 'Nothing has happened yet, so this is the cheapest place to catch a mistake.', viz: 'planreview',
+    human: `Editors sign off on the outline before the draft. Builders check the drawings before pouring concrete. Measure twice, cut once.`,
+    beg: `The plan is a draft from someone who met your project five minutes ago. Read every step. See something you don’t like? Say so in plain words (“drop step 3”, “re-plan without touching the database”) and get a revised plan. Keep iterating until there’s nothing left to push back on. You’ll know it’s ready when every step is one you’d be comfortable doing yourself.`,
+    dev: `Scan for: assumptions stated as facts (check them against your brief), steps outside the scope, anything irreversible (delete, migrate, push, send, deploy, pay), new dependencies, missing tests, and a stop point that moved. Ask “what could go wrong with step 5?” and “what did you assume?” Plan review is code review done earlier, when changes are cheapest.`, see: ['hallucination', 'pit-unread', 'confusion'] },
+  { id: 'qs-implement', sec: 'quickstart', step: 5, term: 'Implementation', tag: 'Approve the plan, say how to work, and say where to stop.',
+    extra: `<p class="mini-h">Pick a stopping point</p>
+      <div class="cf-types">
+        <div><b>“Show me the changes before you edit the file.”</b><span>Use for anything you’re unsure about. You approve each edit.</span></div>
+        <div><b>“Stop before you commit.”</b><span>It does the work. You review the diff, then commit.</span></div>
+        <div><b>“Commit, but don’t push.”</b><span>Changes stay on your machine until you say so.</span></div>
+        <div><b>“Keep going until the tests pass, then stop.”</b><span>Useful when it has a clear pass or fail check.</span></div>
+      </div>
+      <div class="callout"><b>Give it a way to check its own work</b>Something that clearly passes or fails, like tests, a build, or a screenshot to compare with the design, lets the agent catch its own mistakes. Then ask for evidence: “show me the test output”, not “it works.”</div>`,
+    beg: `When the plan is right, say so: “Plan looks good, proceed.” Add how you want it to work. “Use Chrome to test it” lets it open the page and click through it like a person would. “/loop” makes it re-check something on a timer, like whether a deploy finished. And name the stopping point. The best place to stop is just before something becomes hard to undo: editing an important file, committing, publishing, sending or spending. You can always say “continue.” You can’t always say “undo.”`,
+    dev: `Approving the plan exits plan mode and starts implementation. “Use Chrome” gives the agent the Claude in Chrome tools: navigate, click, read the console, screenshot. /loop 10m <prompt> reruns a prompt or command on an interval for the current session. Anthropic’s guidance is to give the agent something it can run that comes back pass or fail (a test file, a build exit code, a linter, a screenshot next to the mockup) and to ask for evidence, since “all tests pass” alone tells you very little. Git is your undo button, so put the stop point before the things git doesn’t cover: push, deploy, migrations, outbound messages, payments.`,
+    code: `Plan looks good, proceed. Write a test for toCSV() first and make it
+pass. Then use Chrome to open the page, click Download, and check the
+file. Show me the test output and the diff. Stop before you commit.`, see: ['agentic', 'guardrails', 'evals', 'pit-perms'] },
+  { id: 'qs-loop', sec: 'quickstart', step: 6, term: 'Human in the loop', tag: 'From here it’s review, revise, repeat, until it gets there.',
+    extra: `<div class="kw" role="table" aria-label="Course-correction controls in Claude Code">
+        <div role="row"><b role="cell">Stop it</b><code role="cell">Esc</code><em role="cell">Stops mid-action and keeps everything so far, so you can redirect without losing work.</em></div>
+        <div role="row"><b role="cell">Undo it</b><code role="cell">/rewind</code><em role="cell">Goes back to an earlier point in the session (also: Esc twice on an empty prompt).</em></div>
+        <div role="row"><b role="cell">Start fresh</b><code role="cell">/clear</code><em role="cell">Empties the context. Use it between unrelated tasks.</em></div>
+      </div>
+      <div class="callout warn"><b>The two-correction rule</b>If you’ve corrected the same thing twice and it’s still wrong, don’t try a third time. The conversation is now full of failed attempts. Clear it and write a better prompt that includes what you learned.</div>`,
+    human: `It’s how every apprenticeship works: try, get feedback, adjust, try again. Nobody expects the first draft to be the final one.`,
+    beg: `The agent reaches the stop point and hands back to you. Look at what it did: open the page, read the changes, try it yourself. Tell it specifically what’s wrong (“the filename should include the date”, “the button is hidden on phones”) and send it off again. That’s the rest of the session: review, revise, repeat. You’re the reviewer, not the audience. Your judgment is the part the AI can’t supply.`,
+    dev: `Review the diff, run it yourself, and give feedback with a location and an expected result (“reports.js line 40 drops the header row when there are 0 rows”). Approve permission prompts one at a time rather than turning on blanket auto-approve. Repeated failed corrections poison the context, because the model keeps seeing its own wrong attempts. After two, /clear and re-prompt with what you learned, or start a fresh session from the spec.`, see: ['confusion', 'guardrails', 'harness', 'pit-longchat'] },
+  { id: 'qs-record', sec: 'quickstart', step: 7, term: 'Write specs and decisions into the repo', tag: 'The chat forgets. The repo remembers.',
+    extra: `<div class="cf-types">
+        <div><b>Spec</b><span><i>What</i> to build. The goal, who it’s for, acceptance criteria (how you’ll know it works), and what’s out of scope. One per feature, usually in specs/ or SPEC.md.</span></div>
+        <div><b>Architecture decision record (ADR)</b><span><i>Why</i> it’s built this way. One short file per significant decision: context, decision, alternatives, consequences. Numbered, and never rewritten: a new ADR supersedes an old one.</span></div>
+      </div>
+      <p class="mini-h">Example ADR</p>
+      <pre class="doc"><code># ADR-0003: Use PostgreSQL instead of MongoDB for reservations
+
+Status: Accepted (2026-11-07)
+
+## Context
+Customers reserve skis, boots and snowboards online for specific
+dates. On powder days, several people try to book the last pair in a
+size within seconds of each other. The old spreadsheet system allowed
+double bookings. Reservations, customers, gear and payments are
+tightly linked, and nearly every report joins them.
+
+## Decision
+Store reservations in PostgreSQL. Enforce "the same item can't be
+booked for overlapping dates" in the database itself, with an
+exclusion constraint, so the rule holds even if the app has a bug.
+
+## Alternatives considered
+- MongoDB: flexible documents, but our data is relational, and the
+  overlap rule would live only in application code.
+- SQLite: simplest to run, but allows one writer at a time and has
+  no exclusion constraints.
+
+## Consequences
++ Double bookings are impossible, not just unlikely.
++ Reports are plain SQL joins.
+- We pay for and back up a managed Postgres instance.
+- Schema changes need migrations, reviewed like code.</code></pre>
+      <p class="mini-h">Example spec (excerpt)</p>
+      <pre class="doc"><code># Spec: Online gear reservations
+Goal: customers reserve rental gear for chosen dates and pick it up
+at the counter.
+
+Acceptance criteria
+- A customer can reserve 1 to 6 items for 1 to 14 days.
+- An item can never be reserved twice for overlapping dates.
+- A confirmation email arrives within one minute.
+
+Out of scope: online payment (paid at pickup), delivery.</code></pre>`,
+    human: `Teams keep decision logs for the same reason. A year later, nobody remembers why the database is Postgres, until someone reads the note. It also stops the next person from “fixing” a decision they didn’t know was deliberate.`,
+    beg: `When the session ends, everything the AI learned goes with it. So save the thinking into the project itself. A spec says what the feature should do and how you’ll know it works. An architecture decision record (ADR) captures a choice and the reason behind it, like picking Postgres so two customers can never book the same skis. The plan it followed can go in too. The next session, whether it’s an agent or a person, reads these first and starts where you left off. A good way to get a spec: tell the AI “interview me until you could write the spec, then write it to SPEC.md.”`,
+    dev: `The ADR format comes from Michael Nygard (2011): Title, Status, Context, Decision, Consequences. Common homes are docs/adr/NNNN-title.md, specs/ and docs/plans/. Spec-driven tools like GitHub’s Spec Kit formalize the chain as spec → plan → tasks → implement. Anthropic suggests having Claude interview you until it could write the spec, saving it to SPEC.md, then building from it in a fresh session so the build starts with clean context. Make “write the ADR” the last step of the plan, and keep CLAUDE.md short, pointing at these files so they load only when relevant.`,
+    code: `docs/
+  adr/0003-postgres-for-reservations.md
+  specs/online-reservations.md
+  plans/2026-11-07-online-reservations.md
+CLAUDE.md   # "Read docs/adr/ before changing the data model."
+
+-- the ADR's key rule, enforced by the database
+CREATE EXTENSION btree_gist;
+ALTER TABLE reservations ADD CONSTRAINT no_double_booking
+  EXCLUDE USING gist (item_id WITH =, rental_period WITH &&);`, see: ['memory', 'skills', 'compaction', 'contexteng'] },
+
   // 0. History
   { id: 'turing', sec: 'history', term: 'The Turing test', tag: 'If you can’t tell it from a person, does it think?', viz: 'turing',
     beg: "In 1950, mathematician Alan Turing suggested swapping the impossible question “can machines think?” for a game. A judge chats by text with two hidden players, one human and one machine. If the judge can’t reliably tell which is which, the machine wins. For 70 years it was the most famous goal in AI. Today’s chatbots can pass short versions of it, which has mostly taught us that sounding human and understanding aren’t the same thing.",
@@ -295,7 +434,7 @@ print(f"{score:.0%} passed")`, see: ['hallucination'] },
     dev: "Cost is roughly input tokens times input price plus output tokens times output price, and output usually costs more. Levers: smaller models for easy steps, caching, shorter context, streaming for perceived speed, and batch APIs for jobs that aren't urgent.", see: ['caching', 'token'] },
 ];
 const byId = Object.fromEntries(TERMS.map(t => [t.id, t]));
-const EXTRA_NAMES = { spot: 'Spot the hallucination', timeline: 'AI timeline', turing: 'The Turing test', math: 'The math', 'pit-vague': 'Vague prompts', 'pit-inject': 'Prompt injection' };
+const EXTRA_NAMES = { spot: 'Spot the hallucination', timeline: 'AI timeline', turing: 'The Turing test', math: 'The math', 'pit-vague': 'Vague prompts', 'pit-inject': 'Prompt injection', 'pit-nodata': 'Asking about things it never saw', 'pit-perms': 'Giving an agent the keys', 'pit-unread': "Shipping code you haven't read", 'pit-afraid': 'Being afraid to ask', 'pit-longchat': 'One endless chat' };
 const nameOf = id => byId[id] ? byId[id].term.replace(/ \(.*\)/, '') : EXTRA_NAMES[id];
 
 const HABITS = [
@@ -360,6 +499,8 @@ const QUIZ = [
   ['What does MCP standardize?', ['How models are trained', 'How text is split into tokens', 'How AI apps connect to tools and data', 'How prompts are cached'], 2, 'One protocol so any MCP app can plug into any MCP server.', 'mcp'],
   ['An AI answer includes a link to an official-looking source. What should you do?', ['Trust it, since it has a real domain', 'Open it and check it says what the AI claims', 'Ask the AI if the link is real', 'Remove the link and keep the claim'], 1, 'Invented links often use real domains. Asking the AI again can produce a confident "yes, it\'s real".', 'pit-cite'],
   ['You need the total of a 3,000-row column. Best way to use AI?', ['Paste the rows and ask for the total', 'Ask it to estimate', 'Ask it to write a formula or script, then run it', 'Ask twice and average the answers'], 2, 'Models predict digits; they don\'t calculate. Let code do the math.', 'pit-math'],
+  ['You want an AI agent to make a change that touches several files. Best first message?', ['"Make the change."', 'The task, the context, the constraints and a stop point, then "give me a plan"', 'Paste the whole project into the chat', 'Turn on auto-approve so it can move fast'], 1, 'Plan first. Nothing changes yet, so nothing can break yet, and the plan is where bad assumptions show up.', 'qs-plan'],
+  ['The agent\'s plan ends with "commit and push to main", but you said "stop before committing". What now?', ['Let it go; you can revert later', 'Push back: fix that step and re-plan before saying proceed', 'Say proceed but watch closely', 'Start a new chat and hope for better'], 1, 'The plan is a draft. Change what you don\'t like until every step is one you\'d do yourself. Pushing is one of the things git can\'t undo for you.', 'qs-review'],
 ];
 
 /* ---------- history ---------- */

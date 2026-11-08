@@ -501,6 +501,58 @@ VIZ.spot = box => {
 };
 
 
+VIZ.planreview = box => {
+  const BRIEF = [
+    ['Task', 'Add a "Download CSV" button to the reports page so staff can export the table.'],
+    ['Context', 'Plain HTML/JS site in this folder, no build step. The table is built in js/reports.js from GET /api/reports.'],
+    ['Constraints', "Don't touch the API or the database. Nothing destructive. No new dependencies."],
+    ['Stop point', "Stop before committing. I'll review the diff."],
+  ];
+  const S = [
+    ['Read reports.html and js/reports.js to see how the table is built.', false, 'Fine. Gathering context before changing anything.'],
+    ['Call GET /api/reports once to check the shape of the data.', false, 'Fine. A read, not a write, and it stays inside the scope.'],
+    ['Add a pre-computed csv column to the reports table in the database so the export is faster.', true, 'Push back. The brief said don\'t touch the database. A schema change is also hard to undo.'],
+    ['Install the csv-export-pro package and add a small build step to bundle it.', true, 'Push back. No new dependencies, no build step. A plausible-sounding package you\'ve never heard of is also how made-up or malicious packages get in.'],
+    ['Write a toCSV(rows) function in js/reports.js that escapes quotes, commas and line breaks.', false, 'Fine. Small, in scope, and it handles the edge cases.'],
+    ['Add the button above the table and wire it to download reports.csv.', false, 'Fine. This is the task.'],
+    ['Remove the old Print button, since nobody uses it.', true, 'Push back. An assumption stated as a fact, and outside the scope. Nobody asked for anything to be removed.'],
+    ['Test by opening the page and downloading a CSV with 0, 1 and 1,000 rows.', false, 'Fine. Tests, including the empty case.'],
+    ['Commit the change and push to main.', true, 'Push back. The stop point was "before committing", and pushing to main is one of the things git can\'t undo for you.'],
+  ];
+  const FLAWS = S.filter(s => s[1]).length;
+  box.innerHTML = `<p class="vlabel">Your brief</p>
+    <div class="brief">${BRIEF.map(([k, v]) => `<div><b>${k}</b><span>${esc(v)}</span></div>`).join('')}</div>
+    <p class="vlabel" style="margin-top:14px">The plan it came back with</p>
+    <ol class="plan-steps">${S.map((s, i) => `<li><button class="pstep" data-i="${i}" aria-pressed="false"><span class="pnum">${i + 1}</span><span>${esc(s[0])}</span></button></li>`).join('')}</ol>
+    <div class="vbtns"><button class="btn" id="pr-check">Check my review</button><button class="btn ghost" id="pr-reset">Try again</button><span class="hint" id="pr-hint">Click every step you'd push back on.</span></div>
+    <div class="spot-out" id="pr-out" aria-live="polite"></div>`;
+  const steps = $$('.pstep', box);
+  let checked = false;
+  steps.forEach(b => b.onclick = () => {
+    if (checked) return;
+    const f = !b.classList.contains('flag'); b.classList.toggle('flag', f); b.setAttribute('aria-pressed', f);
+    $('#pr-hint', box).textContent = `${steps.filter(c => c.classList.contains('flag')).length} flagged`;
+  });
+  $('#pr-check', box).onclick = () => {
+    checked = true;
+    let caught = 0, alarms = 0;
+    steps.forEach((b, i) => { const f = b.classList.contains('flag'); b.classList.remove('flag'); b.classList.add(S[i][1] ? 'bad' : 'ok'); if (f && S[i][1]) caught++; if (f && !S[i][1]) alarms++; });
+    const missed = FLAWS - caught;
+    $('#pr-out', box).innerHTML = `<p><b>You caught ${caught} of ${FLAWS} steps worth pushing back on${alarms ? `, with ${alarms} false alarm${alarms > 1 ? 's' : ''}` : ''}.</b> ${missed ? 'The ones you missed are in red.' : 'Nothing got past you.'} ${alarms ? 'Flagging a fine step costs you a sentence. Missing a bad one can cost you a database.' : ''}</p>` +
+      S.filter(s => s[1]).map(s => `<p>✕ ${esc(s[2])}</p>`).join('') +
+      `<p><b>What you'd say back:</b></p><pre><code>Drop step 3 (the database is off limits), step 4 (no dependencies, no build
+step) and step 7 (out of scope). Stop after step 8 and show me the diff;
+I'll commit. Re-plan with those changes.</code></pre>
+      <p>Five steps were fine. The point isn't to distrust everything. It's that four plausible-sounding lines would have broken your rules, and the plan is the only place where catching them costs nothing.</p>`;
+    $('#pr-hint', box).textContent = '';
+  };
+  $('#pr-reset', box).onclick = () => {
+    checked = false;
+    steps.forEach(b => { b.classList.remove('flag', 'ok', 'bad'); b.setAttribute('aria-pressed', 'false'); });
+    $('#pr-out', box).innerHTML = ''; $('#pr-hint', box).textContent = "Click every step you'd push back on.";
+  };
+};
+
 VIZ.playground = box => {
   const PRESETS = [
     ['Vague', 'write a poem'],

@@ -18,14 +18,15 @@ The guide is split into tabs that build on each other. Work through them in orde
 | Tab | What's in it |
 |---|---|
 | Start here | A clickable map of how the pieces fit together, and a suggested path |
-| 01 History & math | A timeline from Turing (1950) to agents (2025), the Turing test, words as vectors, attention, the five formulas behind it all, and why nobody fully understands what's inside a model |
-| 02 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
-| 03 Prompting | prompt engineering, system prompt, few-shot prompting, reasoning, structured output |
-| 04 Tools & skills | tools vs skills vs the agent loop, tool use, MCP, RAG, vector database, skills |
-| 05 Agents | agent, harness, subagents, agentic AI, memory, compaction, context engineering |
-| 06 Shipping it | prompt caching, fine-tuning vs prompting, evals, guardrails, latency & cost |
-| 07 Good & bad habits | 10 common mistakes, what goes wrong, and what to do instead |
-| 08 Quiz | 13 questions |
+| 01 Quick start | What to do once you've opened a chat with an AI, in seven steps: start with what you're curious about, give it context and let it gather the rest, plan before anything changes (rules, stop point, which keywords actually do something), read the plan, implementation (Chrome, /loop, stopping points, self-checks), human in the loop (Esc, /rewind, the two-correction rule), and specs and architecture decision records in the repo. Includes a review-the-plan game, an example ADR and spec, and a copyable starter brief |
+| 02 History & math | A timeline from Turing (1950) to agents (2025), the Turing test, words as vectors, attention, the five formulas behind it all, and why nobody fully understands what's inside a model |
+| 03 How models work | LLM, token, context window, context confusion (context rot), temperature, embedding, hallucination |
+| 04 Prompting | prompt engineering, system prompt, few-shot prompting, reasoning, structured output |
+| 05 Tools & skills | tools vs skills vs the agent loop, tool use, MCP, RAG, vector database, skills |
+| 06 Agents | agent, harness, subagents, agentic AI, memory, compaction, context engineering |
+| 07 Shipping it | prompt caching, fine-tuning vs prompting, evals, guardrails, latency & cost |
+| 08 Good & bad habits | 10 common mistakes, what goes wrong, and what to do instead |
+| 09 Quiz | 15 questions |
 
 ## Live demos
 
@@ -49,6 +50,7 @@ The guide is split into tabs that build on each other. Work through them in orde
 - **Prompt caching**: a cache miss and a cache hit, side by side
 - **Fine-tuning vs prompting**: a yes/no decision helper
 - **Spot the hallucination**: find the three made-up claims hidden in an AI answer
+- **Review the plan**: an agent's nine-step plan for a small feature, with four steps that break the brief (touches the database, adds a dependency, deletes something out of scope, pushes past the stop point); flag them, then see what to say back
 
 ## Running it locally
 
@@ -70,7 +72,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 | `js/demos.js` | The interactive demos |
 | `js/app.js` | Tabs, search, the Plain English / Developer toggle and the quiz |
 
-To add a term, add an entry to `TERMS` in `js/content.js`. Give it a `viz` name and a matching function in `js/demos.js` if it needs a demo.
+To add a term, add an entry to `TERMS` in `js/content.js`. Give it a `viz` name and a matching function in `js/demos.js` if it needs a demo. Quick-start cards are `TERMS` entries with `sec: 'quickstart'` and a `step` number; they render in step order.
 
 It works on phones, follows the system's light or dark mode, and respects the reduced-motion setting.
 

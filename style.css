@@ -565,3 +565,50 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 14px; }
   .hx em { grid-column: 1 / -1; }
   .hx .hx-h span:last-child { display: none; }
 }
+
+/* quick start: step strip, numbered step cards */
+.lead-sub { margin-top: 10px; font-size: 16px; color: var(--muted); max-width: 62ch; }
+.inline-link { border: 0; background: none; padding: 0; cursor: pointer; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.qs-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.qs-strip button { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; min-width: 0; transition: border-color .15s, transform .15s; }
+.qs-strip button:hover { border-color: var(--accent); transform: translateY(-2px); }
+.qs-strip b { font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: var(--accent); }
+.qs-strip span { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); }
+.qs-strip small { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.qs-why { margin-bottom: 20px; font-size: 15px; }
+.qs-steps .mini { padding: 24px; }
+.qs-steps .mini .ctext > .beg p, .qs-steps .mini .ctext > .dev p, .qs-steps .mini .tagline { max-width: 76ch; }
+.step-badge { align-self: flex-start; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--model); background: var(--model-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: -4px; }
+@media (max-width: 1000px) { .qs-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .qs-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .qs-steps .mini { padding: 18px; } }
+
+/* quick start: review-the-plan demo */
+.brief { display: grid; gap: 4px; font-size: 13.5px; }
+.brief div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; padding: 6px 10px; border-radius: 6px; background: var(--sunk); align-items: baseline; }
+.brief b { font-family: var(--font-display); color: var(--model); }
+.plan-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pstep { width: 100%; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: baseline; text-align: left; border: 1.5px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 14.5px; line-height: 1.45; transition: background .15s, border-color .15s; }
+.pstep:hover { border-color: var(--muted); }
+.pnum { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); text-align: right; }
+.pstep.flag { background: var(--model-soft); border-color: var(--model); }
+.pstep.flag .pnum { color: var(--model); }
+.pstep.ok { background: var(--ok-soft); border-color: var(--ok); }
+.pstep.bad { background: var(--bad-soft); border-color: var(--bad); }
+.spot-out pre { margin-top: 2px; }
+@media (max-width: 560px) { .brief div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+body.searching .qs-strip, body.searching .qs-why { display: none; }
+
+/* quick start v2: rules list, keyword table, document examples, starter brief */
+.callout .rules { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 3px; font-size: 14px; }
+.kw { display: grid; gap: 4px; font-size: 13.5px; }
+.kw > div { display: grid; grid-template-columns: 100px minmax(160px, 0.9fr) minmax(0, 1.6fr); gap: 10px; padding: 7px 10px; border-radius: 6px; background: var(--sunk); align-items: baseline; }
+.kw b { font-family: var(--font-display); }
+.kw code { font-size: 12.5px; color: var(--model); font-weight: 600; white-space: pre-wrap; }
+.kw em { font-style: normal; color: var(--muted); }
+pre.doc { margin-top: 0; font-size: 12.5px; max-height: 420px; overflow: auto; }
+.cf-types span i { font-style: italic; color: var(--ink); }
+.brief-card pre { margin-top: 0; }
+@media (max-width: 760px) {
+  .kw > div { grid-template-columns: 90px minmax(0, 1fr); }
+  .kw em { grid-column: 1 / -1; }
+}
